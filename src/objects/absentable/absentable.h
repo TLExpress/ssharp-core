@@ -54,7 +54,6 @@ namespace ssharp::absentable
 	{
 	public:
 		using bptr_obj<T>::bptr_obj;
-		~nabptr_obj() {}
 		nabptr_obj(const nabptr_obj& rhs);
 		nabptr_obj(nabptr_obj&& rhs) noexcept;
 		nabptr_obj() = delete;
@@ -69,7 +68,6 @@ namespace ssharp::absentable
 	{
 	public:
 		using bptr_obj<T>::bptr_obj;
-		~abs_obj(){}
 		using bptr_obj<T>::absent;
 		using bptr_obj<T>::attend;
 		using bptr_obj<T>::unload;
