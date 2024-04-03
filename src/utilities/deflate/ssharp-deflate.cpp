@@ -3,7 +3,7 @@
 namespace ssharp::deflate
 {
 #define checkSuccess(x) if(x)throw unsuccess_zlib_operation("zlib operation not success")
-    buff_pair_t deflateBuff(const buff_pair_t& inpair, int level)
+    buff_pair_t deflateBuff(const buff_pair_t& inpair)
 	{
         auto& inbuff = inpair.first;
         auto insize = (uint32_t)inpair.second;
@@ -18,7 +18,7 @@ namespace ssharp::deflate
         stream.zfree = (free_func)0;
         stream.opaque = (voidpf)0;
 
-        checkSuccess(deflateInit2(&stream, level, Z_DEFLATED, -(MAX_WBITS), DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY));
+        checkSuccess(deflateInit2(&stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, -(MAX_WBITS), DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY));
         left = deflateBound(&stream, insize);
         buff_t outbuff = make_shared<char[]>(left);
 
@@ -48,7 +48,7 @@ namespace ssharp::deflate
         return std::make_pair(outbuff, outsize);
 	}
 
-    buff_pair_t inflateBuff(const buff_pair_t& inpair, uint32_t outsize, int level)
+    buff_pair_t inflateBuff(const buff_pair_t& inpair, uint32_t outsize)
     {
         auto& inbuff = inpair.first;
         auto insize = (uint32_t)inpair.second;

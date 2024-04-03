@@ -3,28 +3,35 @@
 namespace ssharp::absentable
 {
 	template<typename T>
-	abs_obj<T>::abs_obj() {}
+	bool bptr_obj<T>::attend() const { return value != nullptr; }
 
 	template<typename T>
-	abs_obj<T>::abs_obj(T&& rhs) {value = std::make_shared<T>(std::forward<T>(rhs)); }
+	bool bptr_obj<T>::absent() const { return value == nullptr; }
 
 	template<typename T>
-	abs_obj<T>::abs_obj(abs_obj& rhs) { *this = rhs; }
+	void bptr_obj<T>::unload() { this->value = nullptr; }
+
+//	template<typename T>
+//	bptr_obj<T>::bptr_obj() {}
+
+	bptr_obj<uint64_t>::bptr_obj() {}
 
 	template<typename T>
-	abs_obj<T>::abs_obj(abs_obj&& rhs) { *this = std::move(rhs); }
+	bptr_obj<T>::bptr_obj(const T& rhs) { set(rhs); }
 
 	template<typename T>
-	bool abs_obj<T>::attend() { return value != nullptr; }
+	bptr_obj<T>::bptr_obj(T&& rhs) {set(std::move(rhs)); }
 
 	template<typename T>
-	bool abs_obj<T>::absent() { return value == nullptr; }
+	bptr_obj<T>::bptr_obj(const bptr_obj& rhs) { set(rhs); }
 
 	template<typename T>
-	void abs_obj<T>::unload() { value = nullptr; }
+	bptr_obj<T>::bptr_obj(bptr_obj&& rhs) { set(std::move(rhs)); }
+	template<typename T>
+	bptr_obj<T>::~bptr_obj() { value = nullptr; }
 
 	template<typename T>
-	const T& abs_obj<T>::get() 
+	T& bptr_obj<T>::get()
 	{
 		if (absent())
 			throw ssharp::exceptions::value_absent("value absent");
@@ -32,42 +39,139 @@ namespace ssharp::absentable
 	}
 
 	template<typename T>
-	void abs_obj<T>::set(T&& rhs) {	value = make_shared<T>(std::forward<T>(rhs)); }
-
-	template<typename T>
-	void abs_obj<T>::set(abs_obj& rhs) { value = make_shared<T>(rhs.get()); }
-
-	template<typename T>
-	void abs_obj<T>::set(abs_obj&& rhs)
+	const T& bptr_obj<T>::get() const
 	{
-		value = make_shared<T>(std::move(rhs.get()));
+		if (absent())
+			throw ssharp::exceptions::value_absent("value absent");
+		return *value.get();
+	}
+
+	template<typename T>
+	void bptr_obj<T>::set(const T& rhs) { *value = rhs; }
+
+	template<typename T>
+	void bptr_obj<T>::set(T&& rhs) noexcept { *value = std::move(rhs); }
+
+	template<typename T>
+	void bptr_obj<T>::set(const bptr_obj& rhs) { set(rhs.get()); }
+
+	template<typename T>
+	void bptr_obj<T>::set(bptr_obj&& rhs) noexcept
+	{
+		set(std::move(rhs.get()));
 		rhs.unload();
 	}
 
 	template<typename T>
-	bool abs_obj<T>::operator==(const T& rhs) { return value == rhs; }
+	bool bptr_obj<T>::operator==(const T& rhs) const { return *value == rhs; }
 
 	template<typename T>
-	bool abs_obj<T>::operator==(const abs_obj& rhs) { return value == rhs.get(); }
+	bool bptr_obj<T>::operator==(const bptr_obj& rhs) const { return *value == rhs.get(); }
 
 	template<typename T>
-	T& abs_obj<T>::operator=(T&& rhs)
-	{ 
-		this->set(std::forward<T>(rhs)); 
-		return *this->get();
+	T& bptr_obj<T>::operator=(const T& rhs)
+	{
+		this->set(rhs);
+		return this->get();
 	}
 
 	template<typename T>
-	abs_obj<T>& abs_obj<T>::operator=(abs_obj& rhs)
+	T& bptr_obj<T>::operator=(T&& rhs) noexcept
+	{ 
+		this->set(std::move(rhs)); 
+		return this->get();
+	}
+
+	template<typename T>
+	bptr_obj<T>& bptr_obj<T>::operator=(const bptr_obj& rhs)
 	{
 		this->set(rhs);
 		return *this;
 	}
 
 	template<typename T>
-	abs_obj<T>& abs_obj<T>::operator=(abs_obj&& rhs)
+	bptr_obj<T>& bptr_obj<T>::operator=(bptr_obj&& rhs) noexcept
 	{
-		this->set(std::forward<T>(rhs));
-		return *this->get(); 
+		this->set(std::move(rhs));
+		return *this; 
+	}
+
+	template<typename T>
+	const T* bptr_obj<T>::operator->() const
+	{
+		if (absent())
+			throw ssharp::exceptions::value_absent("value absent");
+		return value.get();
+	}
+
+	template<typename T>
+	T* bptr_obj<T>::operator->()
+	{
+		if (absent())
+			throw ssharp::exceptions::value_absent("value absent");
+		return value.get();
+	}
+
+	template<typename T>
+	const T& bptr_obj<T>::operator*() const
+	{
+		return get();
+	}
+
+	template<typename T>
+	T& bptr_obj<T>::operator*()
+	{
+		return get();
+	}
+
+	template<typename T>
+	void abs_obj<T>::set(const T& rhs) { this->value = std::make_shared<T>(rhs); }
+
+	template<typename T>
+	void nabptr_obj<T>::set(const nabptr_obj& rhs) { set(rhs.get()); }
+
+	template<typename T>
+	void nabptr_obj<T>::set(nabptr_obj&& rhs) noexcept
+	{
+		set(std::move(rhs.get()));
+		rhs.unload();
+	}
+
+	template<typename T>
+	nabptr_obj<T>& nabptr_obj<T>::operator=(const nabptr_obj& rhs)
+	{
+		this->set(rhs);
+		return *this;
+	}
+
+	template<typename T>
+	nabptr_obj<T>& nabptr_obj<T>::operator=(nabptr_obj&& rhs) noexcept
+	{
+		this->set(std::move(rhs));
+		return *this;
+	}
+
+	template<typename T>
+	void abs_obj<T>::set(const abs_obj& rhs) { set(rhs.get()); }
+
+	template<typename T>
+	void abs_obj<T>::set(abs_obj&& rhs) noexcept
+	{
+		set(std::move(rhs.get()));
+		rhs.unload();
+	}
+
+	template<typename T>
+	abs_obj<T>& abs_obj<T>::operator=(const abs_obj& rhs)
+	{
+		this->set(rhs);
+		return *this;
+	}
+
+	template<typename T>
+	abs_obj<T>& abs_obj<T>::operator=(abs_obj&& rhs) noexcept
+	{
+		this->set(std::move(rhs));
+		return *this;
 	}
 }

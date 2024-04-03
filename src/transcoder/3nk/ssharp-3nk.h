@@ -74,7 +74,7 @@ namespace ssharp::_3nk
 	class __SSHARP_3NK_DLL transcoder
 	{
 	protected:
-		typedef function<void(buff_t, size_t, buff_t&, size_t&)> streamRoutine;
+		typedef function<buff_pair_t(const buff_pair_t&)> streamRoutine;
 		typedef function<void(istream&&, ostream&)> fileRoutine;
 		static void transcodeBuffer(const buff_t inbuff, buff_t outbuff, const size_t size, const int64_t seed);
 		static void transcodeBuffer(const buff_t buff, const size_t size, const int64_t seed);
@@ -82,13 +82,16 @@ namespace ssharp::_3nk
 		static void processFile(const string& inFileName, const string& outFileName, fileRoutine routine);
 
 	public:
-		static bool is3nKFileBuff(buff_t buff, size_t size);
+		static bool is3nKFileBuff(const buff_pair_t& inpair);
 		template<typename IStream>
 		static bool is3nKStream(IStream&& stream);
 		static bool is3nKFile(const string& FileName);
-		static void encodeFileBuff(const buff_t& inbuff, size_t insize, buff_t& outbuff, size_t& outsize);
-		static void decodeFileBuff(const buff_t& inbuff, size_t insize, buff_t& outbuff, size_t& outsize);
-		static void transcodeFileBuff(const buff_t& inbuff, size_t insize, buff_t& outbuff, size_t& outsize);
+		static buff_pair_t encodeFileBuff(const buff_pair_t& inpair);
+		static buff_pair_t decodeFileBuff(const buff_pair_t& inpair);
+		static buff_pair_t transcodeFileBuff(const buff_pair_t& inpair);
+		static buff_pair_t encodeFileBuff(const buff_pair_t& inpair, bool nodelete);
+		static buff_pair_t decodeFileBuff(const buff_pair_t& inpair, bool nodelete);
+		static buff_pair_t transcodeFileBuff(const buff_pair_t& inpair, bool nodelete);
 		template<typename Istream, typename Ostream>
 		static void encodeStream(Istream&& input, Ostream&& output);
 		template<typename Istream, typename Ostream>

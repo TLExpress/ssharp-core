@@ -24,6 +24,8 @@ using namespace ssharp::types;
 
 namespace ssharp::loader::stream_loader
 {
+	extern buff_pair_t __SSHARP_STREAMLOADER_DLL loadStream(istream& instream,size_t pos, size_t insize);
+	extern buff_pair_t __SSHARP_STREAMLOADER_DLL loadStream(istream&& instream, size_t pos, size_t insize);
 	extern buff_pair_t __SSHARP_STREAMLOADER_DLL loadStream(istream& instream);
 	extern buff_pair_t __SSHARP_STREAMLOADER_DLL loadStream(istream&& instream);
 }

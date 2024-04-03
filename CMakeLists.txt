@@ -36,6 +36,12 @@ add_library(stream-loader STATIC
 	"src/utilities/stream-loader/stream-loader.cpp"
 )
 
+#buff-loader
+add_library(path-spliter STATIC
+	"src/utilities/path-spliter/path-spliter.h"
+	"src/utilities/path-spliter/path-spliter.cpp"
+)
+
 #basic-parser
 add_library(parser-utils STATIC
 	"src/parser/parser-utils/parser-utils.h"
@@ -52,6 +58,12 @@ add_library(ssharp-sii STATIC
 add_library(ssharp-pmd STATIC
 	"src/parser/pmd/ssharp-pmd.h"
 	"src/parser/pmd/ssharp-pmd.cpp"
+)
+
+#directory
+add_library(ssharp-directory STATIC
+	"src/parser/directory/ssharp-directory.h"
+	"src/parser/directory/ssharp-directory.cpp"
 )
 
 #mat
@@ -99,38 +111,71 @@ add_library(ssharp-soundref STATIC
 	"src/utilities/deflate/ssharp-deflate.cpp"
  )
 
+ #absentable
  add_library(ssharp-absentable STATIC
 	"src/objects/absentable/absentable.h"
 	"src/objects/absentable/absentable.cpp"
  )
 
- #entry_objects
+ #entry-objects
  add_library(ssharp-entry-object STATIC
 	"src/objects/entry-objects/entry-objects.h"
 	"src/objects/entry-objects/entry-objects.cpp"
  )
 
- add_executable(file-deflater
-	"src/tools/file-deflater.cpp"
+ #entry-list
+ add_library(ssharp-entry-list STATIC
+	"src/objects/entry-list/entry-list.h"
+	#"src/objects/entry-list/list-node.cpp"
+	"src/objects/entry-list/entry-list.cpp"
+ )
+
+ #entry-list
+ add_library(ssharp-hashfs STATIC
+	"src/fs/hashfs/ssharp-hashfs.h"
+	#"src/objects/entry-list/list-node.cpp"
+	"src/fs/hashfs/ssharp-hashfs.cpp"
+ )
+
+ add_executable(tester
+	"src/tools/tester.cpp"
  )
 
 #include_directories
 target_include_directories(ssharp-cityhash PRIVATE "src/libs/cityhash")
 target_include_directories(ssharp-3nk PRIVATE "src/types" "src/utilities/exceptions")
 target_include_directories(stream-loader PRIVATE "src/types")
+target_include_directories(path-spliter PRIVATE "src/types")
 target_include_directories(parser-utils PRIVATE "src/types" "src/utilities/exceptions" "src/utilities/stream-loader")
 target_include_directories(ssharp-sii PRIVATE "src/types" "src/utilities/exceptions" "src/utilities/stream-loader" "src/parser/parser-utils")
 target_include_directories(ssharp-pmd PRIVATE "src/types" "src/utilities/exceptions" "src/utilities/stream-loader" "src/parser/parser-utils")
+target_include_directories(ssharp-directory PRIVATE "src/types" "src/utilities/exceptions" "src/utilities/stream-loader" "src/parser/parser-utils")
 target_include_directories(ssharp-mat PRIVATE "src/types" "src/utilities/exceptions" "src/utilities/stream-loader" "src/parser/parser-utils")
 target_include_directories(ssharp-tobj PRIVATE "src/types" "src/utilities/exceptions" "src/utilities/stream-loader" "src/parser/parser-utils")
 target_include_directories(ssharp-soundref PRIVATE "src/types" "src/utilities/exceptions" "src/utilities/stream-loader" "src/parser/parser-utils")
 target_include_directories(ssharp-deflate PRIVATE "src/types" "src/libs/zlib" "src/utilities/exceptions")
-target_include_directories(file-deflater PRIVATE
-	"src/utilities/deflate" 
-	"src/utilities/stream-loader" 
-	"src/types" 
-	"src/libs/zlib" 
+
+target_include_directories(tester PRIVATE
+	"src/types"
 	"src/utilities/exceptions"
+	"src/utilities/stream-loader" 
+	"src/utilities/path-spliter" 
+	"src/parser/sii"
+	"src/parser/pmd"
+	"src/parser/directory"
+	"src/parser/mat"
+	"src/parser/tobj"
+	"src/parser/soundref"
+	"src/parser/parser-utils"
+	"src/objects/absentable"
+	"src/utilities/deflate" 
+	"src/libs/zlib"
+	"src/libs/cityhash"
+	"src/utilities/hash"
+	"src/transcoder/3nk"
+	"src/objects/entry-objects"
+	"src/objects/entry-list"
+	"src/fs/hashfs"
 )
 
 target_include_directories(ssharp-entry-object PRIVATE
@@ -139,11 +184,60 @@ target_include_directories(ssharp-entry-object PRIVATE
 	"src/utilities/stream-loader" 
 	"src/parser/sii"
 	"src/parser/pmd"
+	"src/parser/directory"
 	"src/parser/mat"
 	"src/parser/tobj"
 	"src/parser/soundref"
 	"src/parser/parser-utils"
 	"src/objects/absentable"
+	"src/utilities/deflate" 
+	"src/libs/zlib"
+	"src/libs/cityhash"
+	"src/utilities/hash"
+	"src/transcoder/3nk"
+)
+
+target_include_directories(ssharp-entry-list PRIVATE
+	"src/types"
+	"src/utilities/exceptions"
+	"src/utilities/stream-loader" 
+	"src/utilities/path-spliter" 
+	"src/parser/sii"
+	"src/parser/pmd"
+	"src/parser/directory"
+	"src/parser/mat"
+	"src/parser/tobj"
+	"src/parser/soundref"
+	"src/parser/parser-utils"
+	"src/objects/absentable"
+	"src/utilities/deflate" 
+	"src/libs/zlib"
+	"src/libs/cityhash"
+	"src/utilities/hash"
+	"src/transcoder/3nk"
+	"src/objects/entry-objects"
+)
+
+target_include_directories(ssharp-hashfs PRIVATE
+	"src/types"
+	"src/utilities/exceptions"
+	"src/utilities/stream-loader" 
+	"src/utilities/path-spliter" 
+	"src/parser/sii"
+	"src/parser/pmd"
+	"src/parser/directory"
+	"src/parser/mat"
+	"src/parser/tobj"
+	"src/parser/soundref"
+	"src/parser/parser-utils"
+	"src/objects/absentable"
+	"src/utilities/deflate" 
+	"src/libs/zlib"
+	"src/libs/cityhash"
+	"src/utilities/hash"
+	"src/transcoder/3nk"
+	"src/objects/entry-objects"
+	"src/objects/entry-list"
 )
 
 target_include_directories(ssharp-absentable PRIVATE
@@ -160,7 +254,6 @@ target_link_libraries(ssharp-mat PRIVATE ssharp-exceptions stream-loader parser-
 target_link_libraries(ssharp-tobj PRIVATE ssharp-exceptions stream-loader parser-utils)
 target_link_libraries(ssharp-soundref PRIVATE ssharp-exceptions stream-loader parser-utils)
 target_link_libraries(ssharp-deflate PRIVATE zlib-lite ssharp-exceptions)
-target_link_libraries(file-deflater PRIVATE ssharp-deflate stream-loader zlib-lite ssharp-exceptions)
 target_link_libraries(ssharp-absentable PRIVATE ssharp-exceptions)
 target_link_libraries(ssharp-entry-object PRIVATE
 	ssharp-exceptions
@@ -168,10 +261,72 @@ target_link_libraries(ssharp-entry-object PRIVATE
 	parser-utils
 	ssharp-sii
 	ssharp-pmd
+	ssharp-directory
 	ssharp-mat
 	ssharp-tobj
+	ssharp-deflate
 	ssharp-soundref
 	ssharp-absentable
+	zlib-lite
+	ssharp-cityhash
+	ssharp-3nk
+)
+target_link_libraries(ssharp-entry-list PRIVATE
+	ssharp-exceptions
+	stream-loader
+	path-spliter
+	parser-utils
+	ssharp-sii
+	ssharp-pmd
+	ssharp-directory
+	ssharp-mat
+	ssharp-tobj
+	ssharp-deflate
+	ssharp-soundref
+	ssharp-absentable
+	zlib-lite
+	ssharp-cityhash
+	ssharp-3nk
+	ssharp-entry-object
+)
+target_link_libraries(ssharp-hashfs PRIVATE
+	ssharp-exceptions
+	stream-loader
+	path-spliter
+	parser-utils
+	ssharp-sii
+	ssharp-pmd
+	ssharp-directory
+	ssharp-mat
+	ssharp-tobj
+	ssharp-deflate
+	ssharp-soundref
+	ssharp-absentable
+	zlib-lite
+	ssharp-cityhash
+	ssharp-3nk
+	ssharp-entry-object
+	ssharp-entry-list
+)
+target_link_libraries(tester PRIVATE 
+	ssharp-exceptions
+	stream-loader
+	path-spliter
+	parser-utils
+	ssharp-sii
+	ssharp-pmd
+	ssharp-directory
+	ssharp-mat
+	ssharp-tobj
+	ssharp-deflate
+	ssharp-soundref
+	ssharp-absentable
+	zlib-lite
+	ssharp-cityhash
+	ssharp-3nk
+	ssharp-entry-object
+	ssharp-entry-list
+	ssharp-hashfs
 )
 
 #compiler_options
@@ -183,6 +338,7 @@ if(AVX2)
 	endif()
 	target_compile_definitions(ssharp-3nk PRIVATE "__AVX__" "__AVX2__") # Fixes MSVC code highlighting
 endif()
+	target_compile_definitions(zlib-lite PRIVATE NO_GZIP)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET
@@ -190,16 +346,20 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
 	  ssharp-exceptions
 	  ssharp-3nk
 	  stream-loader
+	  path-spliter
 	  parser-utils
 	  ssharp-sii
 	  ssharp-pmd
+	  ssharp-directory
 	  ssharp-mat
 	  ssharp-tobj
 	  ssharp-soundref
 	  zlib-lite
 	  ssharp-deflate
-	  file-deflater
+	  tester
 	  ssharp-absentable
 	  ssharp-entry-object
+	  ssharp-entry-list
+	  ssharp-hashfs
   PROPERTY CXX_STANDARD 20)
 endif()

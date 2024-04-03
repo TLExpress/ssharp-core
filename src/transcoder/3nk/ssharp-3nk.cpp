@@ -57,13 +57,11 @@ namespace ssharp::_3nk
 		{
 			throw ios::failure((string)"at function \"" + __func__ + "\", input/output stream is invalid");
 		}
-		auto insize = input.seekg(0, ios::end).tellg();
-		size_t outsize;
+		auto insize = (size_t)input.seekg(0, ios::end).tellg();
 		buff_t inbuff(make_shared<char[]>((size_t)insize));
 		input.seekg(0).read(inbuff.get(), insize);
-		buff_t outbuff;
-		routine(inbuff, (size_t)insize, outbuff, outsize);
-		output.seekp(0).write(outbuff.get(), outsize);
+		auto outpair = routine(make_pair(inbuff,insize));
+		output.seekp(0).write(outpair.first.get(), outpair.second);
 	}
 
 	void transcoder::processFile(const string& infilename, const string& outfilename, fileRoutine routine)
@@ -75,9 +73,9 @@ namespace ssharp::_3nk
 
 // public zone
 
-	bool transcoder::is3nKFileBuff(const buff_t buff, const size_t size)
+	bool transcoder::is3nKFileBuff(const buff_pair_t& inpair)
 	{
-		return size >= header_size && *(uint32_t*)(buff.get()) == _3nK_sign;
+		return inpair.second >= header_size && *(uint32_t*)(inpair.first.get()) == _3nK_sign;
 	}
 
 	template<typename IStream>
@@ -105,45 +103,67 @@ namespace ssharp::_3nk
 		return is3nKStream(ifstream(filename, ios::in | ios::binary));
 	}
 
-	void transcoder::encodeFileBuff(const buff_t& inbuff, const size_t insize, buff_t& outbuff, size_t& outsize)
+	buff_pair_t transcoder::encodeFileBuff(const buff_pair_t& inpair, bool nodelete)
 	{
+		auto& inbuff = inpair.first;
+		auto& insize = inpair.second;
 		srand((uint32_t)time(NULL));
-		outsize = insize + header_size;
+		auto outsize = insize + header_size;
 		Header header = { _3nK_sign ,0,(uint8_t)(rand() % 255 + 1) };
-		outbuff = make_shared<char[]>(outsize);
+		shared_ptr<char[]> outbuff(new char[outsize], [&nodelete](char* s) {if (!nodelete)delete[] s; });
 		*(Header*)(outbuff.get()) = header;
 		transcodeBuffer(inbuff, buff_t(outbuff, outbuff.get() + header_size), insize, header.seed);
+		return std::make_pair(outbuff, outsize);
 	}
 
-	void transcoder::decodeFileBuff(const buff_t& inbuff , const size_t insize, buff_t& outbuff,size_t& outsize)
+	buff_pair_t transcoder::decodeFileBuff(const buff_pair_t& inpair, bool nodelete)
 	{
-		if (!is3nKFileBuff(inbuff, insize))
+		auto& inbuff = inpair.first;
+		auto& insize = inpair.second;
+		if (!is3nKFileBuff(inpair))
 			throw incorrect_format(__func__, "Not a 3nK buff");
-		outsize = insize - header_size;
-		outbuff = make_shared<char[]>(outsize);
+		auto outsize = insize - header_size;
+		shared_ptr<char[]> outbuff(new char[outsize], [&nodelete](char* s) {if (!nodelete)delete[] s; });
 		transcodeBuffer(buff_t(inbuff, inbuff.get() + header_size), outbuff, outsize, ((Header*)inbuff.get())->seed);
+		return std::make_pair(outbuff, outsize);
 	}
 
-	void transcoder::transcodeFileBuff(const buff_t& inbuff, size_t insize, buff_t& outbuff, size_t& outsize)
+	buff_pair_t transcoder::transcodeFileBuff(const buff_pair_t& inpair, bool nodelete)
 	{
-		is3nKFileBuff(inbuff, insize) ? 
-			decodeFileBuff(inbuff, insize, outbuff, outsize) : 
-			encodeFileBuff(inbuff, insize, outbuff, outsize);
+		return is3nKFileBuff(inpair) ? 
+			decodeFileBuff(inpair,nodelete) :
+			encodeFileBuff(inpair, nodelete);
 	}
 
+	buff_pair_t transcoder::encodeFileBuff(const buff_pair_t& inpair)
+	{
+		return encodeFileBuff(inpair, false);
+	}
+
+	buff_pair_t transcoder::decodeFileBuff(const buff_pair_t& inpair)
+	{
+		return decodeFileBuff(inpair, false);
+	}
+
+	buff_pair_t transcoder::transcodeFileBuff(const buff_pair_t& inpair)
+	{
+		return transcodeFileBuff(inpair, false);
+	}
+#define sc(x) static_cast<buff_pair_t(*)(const buff_pair_t&)>(&x)
 	template<typename Istream, typename Ostream>
 	void transcoder::encodeStream(Istream&& input, Ostream&& output)
 	{
 		is3nKStream(input)?
 			throw incorrect_format(__func__, "Already 3nK encoded."):
-			processStream(input, output, encodeFileBuff);
+			processStream(input, output, sc(encodeFileBuff));
 	}
 
 	template<typename Istream, typename Ostream>
 	void transcoder::decodeStream(Istream&& input, Ostream&& output)
 	{
-		processStream(input, output, decodeFileBuff);
+		processStream(input, output, sc(decodeFileBuff));
 	}
+#undef sc
 
 	template<typename Istream, typename Ostream>
 	void transcoder::transcodeStream(Istream&& input, Ostream&& output)
@@ -197,7 +217,7 @@ using namespace ssharp::_3nk;
 
 bool __stdcall ss3nk_is3nKFileBuff(char* buff, size_t size)
 {
-	return transcoder::is3nKFileBuff(buff_t(buff), size);
+	return transcoder::is3nKFileBuff(make_pair(buff_t(buff), size));
 }
 
 bool __stdcall ss3nk_is3nkFilePtr(FILE* file)
@@ -214,10 +234,11 @@ bool __stdcall ss3nk_is3nKFile(char* filename)
 
 int __stdcall ss3nk_encodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize)
 {
-	buff_t out(*outbuff, [](char*) {});
 	try
 	{
-		transcoder::encodeFileBuff(buff_t(inbuff), insize, out, *outsize);
+		auto outpair = transcoder::encodeFileBuff(std::make_pair(buff_t(inbuff), insize),true);
+		*outsize = outpair.second;
+		*outbuff = outpair.first.get();
 	}
 	catch (incorrect_format e)
 	{
@@ -238,8 +259,9 @@ int __stdcall ss3nk_decodeFileBuff(char* inbuff, size_t insize, char** outbuff, 
 {
 	try
 	{
-		buff_t out(*outbuff, [](char*) {});
-		transcoder::decodeFileBuff(buff_t(inbuff), insize, out, *outsize);
+		auto outpair = transcoder::decodeFileBuff(make_pair(buff_t(inbuff), insize),true);
+		*outsize = outpair.second;
+		*outbuff = outpair.first.get();
 	}
 	catch (incorrect_format e)
 	{
@@ -260,8 +282,9 @@ int __stdcall ss3nk_transcodeFileBuff(char* inbuff, size_t insize, char** outbuf
 {
 	try
 	{
-		buff_t out(*outbuff, [](char*) {});
-		transcoder::transcodeFileBuff(buff_t(inbuff), insize, out, *outsize);
+		auto outpair = transcoder::transcodeFileBuff(make_pair(buff_t(inbuff), insize),true);
+		*outsize = outpair.second;
+		*outbuff = outpair.first.get();
 	}
 	catch (incorrect_format e)
 	{

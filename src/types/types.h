@@ -28,6 +28,8 @@ namespace ssharp::types
 	typedef std::pair<buff_t, size_t> buff_pair_t;
 	typedef std::function<parsed_paths_t(const buff_pair_t&)> parse_buff_ft;
 	typedef std::map<uint64_t, std::string> dictionary_t;
+	template<typename T>
+	using filter_ft = std::function<bool(const T&)>;
 	typedef struct
 	{
 		uint8_t CMF;

@@ -45,8 +45,6 @@ using std::string;
 using std::ios;
 using std::set;
 
-typedef enum { pmd_ok, pmd_invalid_io, pmd_buffer_error, pmd_incorrect_format, pmd_no_path_to_parse, pmd_unknown_error} pmd_result;
-
 namespace ssharp::parser::pmd
 {
 	const uint32_t expected_version = 0x04;
