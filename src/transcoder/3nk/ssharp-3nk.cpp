@@ -46,31 +46,6 @@ namespace ssharp::_3nk
 		transcodeBuffer(buff, buff, size, seed);
 	}
 
-	void transcoder::processStream(istream& input, ostream& output, streamRoutine routine)
-	{
-		try
-		{
-			input.exceptions(ios::failbit | ios::badbit);
-			output.exceptions(ios::failbit | ios::badbit);
-		}
-		catch(ios::failure e)
-		{
-			throw ios::failure((string)"at function \"" + __func__ + "\", input/output stream is invalid");
-		}
-		auto insize = (size_t)input.seekg(0, ios::end).tellg();
-		buff_t inbuff(make_shared<char[]>((size_t)insize));
-		input.seekg(0).read(inbuff.get(), insize);
-		auto outpair = routine(make_pair(inbuff,insize));
-		output.seekp(0).write(outpair.first.get(), outpair.second);
-	}
-
-	void transcoder::processFile(const string& infilename, const string& outfilename, fileRoutine routine)
-	{
-		stringstream ss(ios::in | ios::out | ios::binary);
-		routine(ifstream(infilename, ios::in | ios::binary), ss);
-		ofstream(outfilename, ios::out | ios::binary) << ss.seekg(0).rdbuf();
-	}
-
 // public zone
 
 	bool transcoder::is3nKFileBuff(const buff_pair_t& inpair)
@@ -113,7 +88,7 @@ namespace ssharp::_3nk
 		shared_ptr<char[]> outbuff(new char[outsize], [&nodelete](char* s) {if (!nodelete)delete[] s; });
 		*(Header*)(outbuff.get()) = header;
 		transcodeBuffer(inbuff, buff_t(outbuff, outbuff.get() + header_size), insize, header.seed);
-		return std::make_pair(outbuff, outsize);
+		return buff_pair_t(std::move(outbuff),outsize);
 	}
 
 	buff_pair_t transcoder::decodeFileBuff(const buff_pair_t& inpair, bool nodelete)
@@ -125,7 +100,7 @@ namespace ssharp::_3nk
 		auto outsize = insize - header_size;
 		shared_ptr<char[]> outbuff(new char[outsize], [&nodelete](char* s) {if (!nodelete)delete[] s; });
 		transcodeBuffer(buff_t(inbuff, inbuff.get() + header_size), outbuff, outsize, ((Header*)inbuff.get())->seed);
-		return std::make_pair(outbuff, outsize);
+		return buff_pair_t(std::move(outbuff), outsize);
 	}
 
 	buff_pair_t transcoder::transcodeFileBuff(const buff_pair_t& inpair, bool nodelete)
@@ -149,65 +124,6 @@ namespace ssharp::_3nk
 	{
 		return transcodeFileBuff(inpair, false);
 	}
-#define sc(x) static_cast<buff_pair_t(*)(const buff_pair_t&)>(&x)
-	template<typename Istream, typename Ostream>
-	void transcoder::encodeStream(Istream&& input, Ostream&& output)
-	{
-		is3nKStream(input)?
-			throw incorrect_format(__func__, "Already 3nK encoded."):
-			processStream(input, output, sc(encodeFileBuff));
-	}
-
-	template<typename Istream, typename Ostream>
-	void transcoder::decodeStream(Istream&& input, Ostream&& output)
-	{
-		processStream(input, output, sc(decodeFileBuff));
-	}
-#undef sc
-
-	template<typename Istream, typename Ostream>
-	void transcoder::transcodeStream(Istream&& input, Ostream&& output)
-	{
-		is3nKStream(input) ?
-			decodeStream(input, output) :
-			encodeStream(input, output);
-	}
-#define frType static_cast<void(*)(istream&&, ostream&)>
-	void transcoder::encodeFile(const string& infilename, const string& outfilename)
-	{
-		infilename == outfilename ?
-			processFile(infilename, outfilename, frType(&encodeStream)) :
-			encodeStream(ifstream(infilename, ios::in | ios::binary), ofstream(outfilename, ios::out | ios::binary));
-	}
-
-	void transcoder::decodeFile(const string& infilename, const string& outfilename)
-	{
-		infilename == outfilename ?
-			processFile(infilename, outfilename, frType(&decodeStream)) :
-			decodeStream(ifstream(infilename, ios::in | ios::binary), ofstream(outfilename, ios::out | ios::binary));
-	}
-
-	void transcoder::transcodeFile(const string& infilename, const string& outfilename)
-	{
-		infilename == outfilename ?
-			processFile(infilename, outfilename, frType(&transcodeStream)) :
-			transcodeStream(ifstream(infilename, ios::in | ios::binary), ofstream(outfilename, ios::out | ios::binary));
-	}
-#undef frType
-	void transcoder::encodeFile(const string& filename)
-	{
-		encodeFile(filename, filename);
-	}
-
-	void transcoder::decodeFile(const string& filename)
-	{
-		decodeFile(filename, filename);
-	}
-
-	void transcoder::transcodeFile(const string& filename)
-	{
-		transcodeFile(filename, filename);
-	}
 
 }
 
@@ -217,7 +133,7 @@ using namespace ssharp::_3nk;
 
 bool __stdcall ss3nk_is3nKFileBuff(char* buff, size_t size)
 {
-	return transcoder::is3nKFileBuff(make_pair(buff_t(buff), size));
+	return transcoder::is3nKFileBuff(buff_pair_t(buff,size));
 }
 
 bool __stdcall ss3nk_is3nkFilePtr(FILE* file)
@@ -232,227 +148,71 @@ bool __stdcall ss3nk_is3nKFile(char* filename)
 	return transcoder::is3nKFile(filename);
 }
 
-int __stdcall ss3nk_encodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize)
+transcoder_result_t __stdcall ss3nk_encodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize)
 {
 	try
 	{
-		auto outpair = transcoder::encodeFileBuff(std::make_pair(buff_t(inbuff), insize),true);
+		auto outpair = transcoder::encodeFileBuff( buff_pair_t(inbuff ,insize) , true);
 		*outsize = outpair.second;
 		*outbuff = outpair.first.get();
 	}
 	catch (incorrect_format e)
 	{
-		return s3_incorrect_format;
+		return transcoder_incorrect_format;
 	}
 	catch (bad_alloc e)
 	{
-		return s3_buffer_error;
+		return transcoder_buffer_error;
 	}
 	catch (...)
 	{
-		return s3_unknown_error;
+		return transcoder_unknown_error;
 	}
-	return s3_ok;
+	return transcoder_ok;
 }
 
-int __stdcall ss3nk_decodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize)
+transcoder_result_t __stdcall ss3nk_decodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize)
 {
 	try
 	{
-		auto outpair = transcoder::decodeFileBuff(make_pair(buff_t(inbuff), insize),true);
+		auto outpair = transcoder::decodeFileBuff(buff_pair_t(inbuff,insize), true);
 		*outsize = outpair.second;
 		*outbuff = outpair.first.get();
 	}
 	catch (incorrect_format e)
 	{
-		return s3_incorrect_format;
+		return transcoder_incorrect_format;
 	}
 	catch (bad_alloc e)
 	{
-		return s3_buffer_error;
+		return transcoder_buffer_error;
 	}
 	catch (...)
 	{
-		return s3_unknown_error;
+		return transcoder_unknown_error;
 	}
-	return s3_ok;
+	return transcoder_ok;
 }
 
-int __stdcall ss3nk_transcodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize)
+transcoder_result_t __stdcall ss3nk_transcodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize)
 {
 	try
 	{
-		auto outpair = transcoder::transcodeFileBuff(make_pair(buff_t(inbuff), insize),true);
+		auto outpair = transcoder::transcodeFileBuff(buff_pair_t(inbuff,insize), true);
 		*outsize = outpair.second;
 		*outbuff = outpair.first.get();
 	}
 	catch (incorrect_format e)
 	{
-		return s3_incorrect_format;
+		return transcoder_incorrect_format;
 	}
 	catch (bad_alloc e)
 	{
-		return s3_buffer_error;
+		return transcoder_buffer_error;
 	}
 	catch (...)
 	{
-		return s3_unknown_error;
+		return transcoder_unknown_error;
 	}
-	return s3_ok;
-}
-
-int __stdcall ss3nk_encodeFilePtr(FILE* infile, FILE* outfile)
-{
-	if (!infile || !outfile)
-		return s3_invalid_io;
-	try
-	{
-		transcoder::encodeStream(ifstream(infile), ofstream(outfile));
-	}
-	catch (incorrect_format e)
-	{
-		return s3_incorrect_format;
-	}
-	catch (bad_alloc e)
-	{
-		return s3_buffer_error;
-	}
-	catch (ios::failure e)
-	{
-		return s3_invalid_io;
-	}
-	catch (...)
-	{
-		return s3_unknown_error;
-	}
-	return s3_ok;
-}
-
-int __stdcall ss3nk_decodeFilePtr(FILE* infile, FILE* outfile)
-{
-	if (!infile || !outfile)
-		return s3_invalid_io;
-	try
-	{
-		transcoder::decodeStream(ifstream(infile), ofstream(outfile));
-	}
-	catch (incorrect_format e)
-	{
-		return s3_incorrect_format;
-	}
-	catch (bad_alloc e)
-	{
-		return s3_buffer_error;
-	}
-	catch (ios::failure e)
-	{
-		return s3_invalid_io;
-	}
-	catch (...)
-	{
-		return s3_unknown_error;
-	}
-	return s3_ok;
-}
-
-int __stdcall ss3nk_transcodeFilePtr(FILE* infile, FILE* outfile)
-{
-	if (!infile || !outfile)
-		return s3_invalid_io;
-	try
-	{
-		transcoder::transcodeStream(ifstream(infile), ofstream(outfile));
-	}
-	catch (incorrect_format)
-	{
-		return s3_incorrect_format;
-	}
-	catch (bad_alloc)
-	{
-		return s3_buffer_error;
-	}
-	catch (ios::failure)
-	{
-		return s3_invalid_io;
-	}
-	catch (...)
-	{
-		return s3_unknown_error;
-	}
-	return s3_ok;
-}
-
-int __stdcall ss3nk_encodeFile(char* infilename, char* outfilename)
-{
-	try
-	{
-		transcoder::encodeFile(infilename, outfilename);
-	}
-	catch (incorrect_format)
-	{
-		return s3_incorrect_format;
-	}
-	catch (bad_alloc)
-	{
-		return s3_buffer_error;
-	}
-	catch (ios::failure)
-	{
-		return s3_invalid_io;
-	}
-	catch (...)
-	{
-		return s3_unknown_error;
-	}
-	return s3_ok;
-}
-
-int __stdcall ss3nk_decodeFile(char* infilename, char* outfilename)
-{
-	try
-	{
-		transcoder::decodeFile(infilename, outfilename);
-	}
-	catch (incorrect_format)
-	{
-		return s3_incorrect_format;
-	}
-	catch (bad_alloc)
-	{
-		return s3_buffer_error;
-	}
-	catch (ios::failure)
-	{
-		return s3_invalid_io;
-	}
-	catch (...)
-	{
-		return s3_unknown_error;
-	}
-	return s3_ok;
-}
-
-int __stdcall ss3nk_transcodeFile(char* infilename, char* outfilename)
-{
-	try
-	{
-		transcoder::transcodeFile(infilename, outfilename);
-	}
-	catch (incorrect_format)
-	{
-		return s3_incorrect_format;
-	}
-	catch (bad_alloc)
-	{
-		return s3_buffer_error;
-	}
-	catch (ios::failure)
-	{
-		return s3_buffer_error;
-	}
-	catch (...)
-	{
-		return s3_unknown_error;
-	}
-	return s3_ok;
+	return transcoder_ok;
 }

@@ -2,66 +2,6 @@
 
 namespace ssharp::entry_objects
 {
-	content_t& content_t::operator=(const content_t& rhs)
-	{
-		this->source_type = rhs.source_type;
-		this->filename = rhs.filename;
-		this->hash = rhs.hash;
-		this->salt = rhs.salt;
-		this->source_name = rhs.source_name;
-		this->source_pos = rhs.source_pos;
-		this->source_size = rhs.source_size;
-		this->crc32 = rhs.crc32;
-		this->size = rhs.size;
-		this->is_directory = rhs.is_directory;
-		this->compressed = rhs.compressed;
-		this->varify = rhs.varify;
-		this->encrypted = rhs.encrypted;
-		this->zlib_header = rhs.zlib_header;
-		this->adler32 = rhs.adler32;
-		this->mbuff = rhs.mbuff;
-		return *this;
-	}
-
-	content_t& content_t::operator=(content_t&& rhs) noexcept
-	{
-		this->source_type = std::move(rhs.source_type);
-		this->filename = std::move(rhs.filename);
-		this->hash = std::move(rhs.hash);
-		this->salt = std::move(rhs.salt);
-		this->source_name = std::move(rhs.source_name);
-		this->source_pos = std::move(rhs.source_pos);
-		this->source_size = std::move(rhs.source_size);
-		this->crc32 = std::move(rhs.crc32);
-		this->size = std::move(rhs.size);
-		this->is_directory = std::move(rhs.is_directory);
-		this->compressed = std::move(rhs.compressed);
-		this->varify = std::move(rhs.varify);
-		this->encrypted = std::move(rhs.encrypted);
-		this->zlib_header = std::move(rhs.zlib_header);
-		this->adler32 = std::move(rhs.adler32);
-		this->mbuff = std::move(rhs.mbuff);
-		return *this;
-	}
-
-	buff_pair_t content_t::getBuff(size_t size)
-	{
-		if (mbuff.attend())
-			return *mbuff;
-		return stream_loader::loadStream(ifstream(*filename, ios::in | ios::binary),*source_pos,size);
-	}
-
-	buff_pair_t content_t::loadBuff()
-	{
-		if (source_type == memory)
-			return *mbuff;
-		mbuff = stream_loader::loadStream(ifstream(*filename, ios::in | ios::binary), *source_pos, *source_size);
-		source_type = memory;
-		return *mbuff;
-	}
-
-	basic_obj::basic_obj() {}
-
 	basic_obj::basic_obj(const basic_obj& rhs)
 	{
 		*this = rhs;
@@ -107,29 +47,9 @@ namespace ssharp::entry_objects
 		return modified->compressed;
 	}
 
-	bool basic_obj::isEncoded() const
+	bool basic_obj::isModifiedEncrypted() const
 	{
 		return false;
-	}
-
-	bool basic_obj::isEncrypted() const
-	{
-		return modified->encrypted;
-	}
-
-	bool basic_obj::isSelfEncrypted() const
-	{
-		return false;
-	}
-
-	bool basic_obj::isCollapsed() const
-	{
-		return false;
-	}
-
-	bool basic_obj::isDirectory() const
-	{
-		return modified->is_directory;
 	}
 	
 	void basic_obj::compress()
@@ -171,24 +91,12 @@ namespace ssharp::entry_objects
 		source = *modified;
 	}
 
-	void basic_obj::encrypt() {}
-
-	void basic_obj::decrypt() {}
-
-	void basic_obj::encode() {}
-	
-	void basic_obj::decode() {}
-
-	void basic_obj::collapse() {}
-
-	void basic_obj::expand() {}
-
 	void basic_obj::setHashFromName()
 	{
-		ssharp::cityhash::hashSalt(*modified->filename, *modified->salt);
+		cityhash::hashSalt(modified->filename->substr(1), *modified->salt-1);
 	}
 
-	bool basic_obj::setNameFromDictionary(dictionary_t dictionary)
+	bool basic_obj::setNameFromDictionary(const dictionary_t& dictionary)
 	{
 		auto const& it = dictionary.find(*modified->hash);
 		if (it != dictionary.end())
@@ -217,33 +125,6 @@ namespace ssharp::entry_objects
 		source = std::move(rhs.source);
 		modified = std::move(rhs.modified);
 		return *this;
-	}
-
-	bool sii_obj::isEncoded() const
-	{
-		return encoded;
-	}
-
-	bool sii_obj::isSelfEncrypted() const
-	{
-		return encrypted;
-	}
-
-	bool sii_obj::isCollapsed() const
-	{
-		return collapsed;
-	}
-
-	void sii_obj::encode()
-	{
-		if(!isEncoded())
-			modified->mbuff = ssharp::_3nk::transcoder::encodeFileBuff(*modified->mbuff);
-	}
-
-	void sii_obj::decode()
-	{
-		if (isEncoded())
-			modified->mbuff = ssharp::_3nk::transcoder::decodeFileBuff(*modified->mbuff);
 	}
 
 	content_t& basic_obj::getSource()
@@ -286,6 +167,33 @@ namespace ssharp::entry_objects
 		return *modified;
 	}
 
+	bool sii_obj::isEncoded() const
+	{
+		return encoded;
+	}
+
+	bool sii_obj::isEncrypted() const
+	{
+		return encrypted;
+	}
+
+	bool sii_obj::isCollapsed() const
+	{
+		return collapsed;
+	}
+
+	void sii_obj::encode()
+	{
+		if(!isEncoded())
+			modified->mbuff = ssharp::_3nk::transcoder::encodeFileBuff(*modified->mbuff);
+	}
+
+	void sii_obj::decode()
+	{
+		if (isEncoded())
+			modified->mbuff = ssharp::_3nk::transcoder::decodeFileBuff(*modified->mbuff);
+	}
+
 	parsed_paths_t directory_obj::parseBuff()
 	{
 		auto&& ret = parseBuff_f(*modified->mbuff);
@@ -303,6 +211,11 @@ namespace ssharp::entry_objects
 		return content_list.insert(entry).second;
 	}
 
+	bool directory_obj::hasEntry(const string& entry)
+	{
+		return content_list.find(entry)!=content_list.end();
+	}
+
 	void directory_obj::saveToBuff()
 	{
 		modified->mbuff.unload();
@@ -316,6 +229,6 @@ namespace ssharp::entry_objects
 			sprintf_s(buff.get() + pos, buff_size-pos, "%s\x0a", name.c_str());
 			pos += name.size() + 1;
 		}
-		modified->mbuff = std::make_pair(buff, buff_size);
+		modified->mbuff = buff_pair_t(buff, buff_size);
 	}
 }

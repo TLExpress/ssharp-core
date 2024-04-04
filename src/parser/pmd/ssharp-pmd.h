@@ -27,8 +27,8 @@
 
 using namespace ssharp::exceptions;
 using namespace ssharp::types;
-using namespace ssharp::loader;
-using namespace ssharp::parser::utils;
+using namespace ssharp::utils;
+using namespace ssharp::parser;
 
 using std::make_shared;
 using std::make_unique;
@@ -124,6 +124,6 @@ namespace ssharp::parser::pmd
 #include "parser-utils.h"
 #endif
 
-__SSHARP_PMD_EXT parser_result __SSHARP_PMD_CALLTYPE sspmd_parseBuff(char* buff, size_t size, char*** set, int* set_size);
+__SSHARP_PMD_EXT parser_result_t __SSHARP_PMD_CALLTYPE sspmd_parseBuff(char* buff, size_t size, char*** set, int* set_size);
 
 #endif

@@ -31,15 +31,15 @@ namespace ssharp::entry_list
 			if (ext == "sii")
 				entry = sii_obj(std::move(*entry));
 			else if (ext == "sui")
-				entry = sui_obj(std::move(*entry));
+				entry->parseBuff_f = mat::parseBuff;
 			else if (ext == "pmd")
-				entry = pmd_obj(std::move(*entry));
+				entry->parseBuff_f = mat::parseBuff;
 			else if (ext == "mat")
-				entry = mat_obj(std::move(*entry));
+				entry->parseBuff_f = mat::parseBuff;
 			else if (ext == "tobj")
-				entry = tobj_obj(std::move(*entry));
+				entry->parseBuff_f = [](const buff_pair_t& b) {return parsed_paths_t({ parser::tobj::parseBuff(b) });};
 			else if (ext == "soundref")
-				entry = soundref_obj(std::move(*entry));
+				entry->parseBuff_f = [](const buff_pair_t& b) {return parsed_paths_t({ parser::soundref::parseBuff(b) }); };
 		}
 		return ret;
 	}

@@ -30,7 +30,7 @@ extern "C"
 using std::string;
 using std::ostream;
 
-namespace ssharp::cityhash
+namespace ssharp::utils::cityhash
 {
 	extern uint64_t __stdcall SSHARP_CITYHASH_DLL hash(const string& str);
 	extern uint64_t __stdcall SSHARP_CITYHASH_DLL hashSalt(const string& str, uint16_t salt);

@@ -1,20 +1,20 @@
 #include "parser-utils.h"
 
-namespace ssharp::parser::utils
+namespace ssharp::parser
 {
 	namespace multi_paths_parser
 	{
-		parsed_paths_t parseStream(istream& input, multipath_buff_parser parseBuff)
+		parsed_paths_t parseStream(istream& input, multipath_buff_parser_ft parseBuff)
 		{
 			return parseBuff(stream_loader::loadStream(input));
 		}
 
-		parsed_paths_t parseStream(istream&& input, multipath_buff_parser parseBuff)
+		parsed_paths_t parseStream(istream&& input, multipath_buff_parser_ft parseBuff)
 		{
 			return parseStream(input, parseBuff);
 		}
 
-		parsed_paths_t parseFile(const string& filename, multipath_buff_parser parseBuff)
+		parsed_paths_t parseFile(const string& filename, multipath_buff_parser_ft parseBuff)
 		{
 			return parseStream(ifstream(filename, ios::in | ios::binary), parseBuff);
 		}
@@ -39,17 +39,17 @@ namespace ssharp::parser::utils
 
 	namespace single_path_parser
 	{
-		string parseStream(istream& input, singlepath_buff_parser parseBuff)
+		string parseStream(istream& input, singlepath_buff_parser_ft parseBuff)
 		{
 			return parseBuff(stream_loader::loadStream(input));
 		}
 
-		string parseStream(istream&& input, singlepath_buff_parser parseBuff)
+		string parseStream(istream&& input, singlepath_buff_parser_ft parseBuff)
 		{
 			return parseStream(input, parseBuff);
 		}
 
-		string parseFile(const string& filename, singlepath_buff_parser parseBuff)
+		string parseFile(const string& filename, singlepath_buff_parser_ft parseBuff)
 		{
 			return parseStream(ifstream(filename, ios::in | ios::binary), parseBuff);
 		}
@@ -66,7 +66,7 @@ namespace ssharp::parser::utils
 	}
 }
 
-parser_result __SSHARP_PARSERUTILS_CALLTYPE ssmulti_parseFilePtr(FILE* file, char*** set, int* set_size, multi_parseBuff_f parseBuff)
+parser_result_t __SSHARP_PARSERUTILS_CALLTYPE ssmulti_parseFilePtr(FILE* file, char*** set, int* set_size, multi_parseBuff_ft parseBuff)
 {
 	try
 	{
@@ -101,7 +101,7 @@ parser_result __SSHARP_PARSERUTILS_CALLTYPE ssmulti_parseFilePtr(FILE* file, cha
 	return parser_ok;
 }
 
-parser_result __SSHARP_PARSERUTILS_CALLTYPE ssmulti_parseFile(char* filename, char*** set, int* set_size, multi_parseBuff_f parseBuff)
+parser_result_t __SSHARP_PARSERUTILS_CALLTYPE ssmulti_parseFile(char* filename, char*** set, int* set_size, multi_parseBuff_ft parseBuff)
 {
 	try
 	{
@@ -129,7 +129,7 @@ parser_result __SSHARP_PARSERUTILS_CALLTYPE ssmulti_parseFile(char* filename, ch
 	return parser_ok;
 }
 
-parser_result __SSHARP_PARSERUTILS_CALLTYPE sssingle_parseFilePtr(FILE* file, char** str, single_parseBuff_f parseBuff)
+parser_result_t __SSHARP_PARSERUTILS_CALLTYPE sssingle_parseFilePtr(FILE* file, char** str, single_parseBuff_ft parseBuff)
 {
 	try
 	{
@@ -140,10 +140,10 @@ parser_result __SSHARP_PARSERUTILS_CALLTYPE sssingle_parseFilePtr(FILE* file, ch
 		fseek(file, 0, SEEK_SET);
 		if (!fsize)
 			return parser_no_path_to_parse;
-		buff_t buff = make_shared<char[]>(fsize);
-		fread(buff.get(), sizeof(char), fsize, file);
+		buff_pair_t buff(fsize);
+		fread(buff, sizeof(char), buff, file);
 		fseek(file, 0, SEEK_SET);
-		return parseBuff(buff.get(), fsize, str);
+		return parseBuff(buff, buff, str);
 	}
 	catch (incorrect_format e)
 	{
@@ -164,7 +164,7 @@ parser_result __SSHARP_PARSERUTILS_CALLTYPE sssingle_parseFilePtr(FILE* file, ch
 	return parser_ok;
 }
 
-parser_result __SSHARP_PARSERUTILS_CALLTYPE ssmulti_parseFile(char* filename, char** str, single_parseBuff_f parseBuff)
+parser_result_t __SSHARP_PARSERUTILS_CALLTYPE ssmulti_parseFile(char* filename, char** str, single_parseBuff_ft parseBuff)
 {
 	try
 	{

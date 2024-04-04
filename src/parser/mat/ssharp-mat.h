@@ -24,10 +24,10 @@
 #include "stream-loader.h"
 #include "parser-utils.h"
 
-using namespace ssharp::parser::utils;
+using namespace ssharp::parser;
 using namespace ssharp::exceptions;
 using namespace ssharp::types;
-using namespace ssharp::loader;
+using namespace ssharp::utils;
 
 using std::make_shared;
 using std::make_unique;
@@ -66,6 +66,6 @@ namespace ssharp::parser::mat
 #include "parser-utils.h"
 #endif
 
-__SSHARP_MAT_EXT parser_result __SSHARP_MAT_CALL ssmat_parseBuff(char* buff, size_t size, char*** set, int* set_size);
+__SSHARP_MAT_EXT parser_result_t __SSHARP_MAT_CALL ssmat_parseBuff(char* buff, size_t size, char*** set, int* set_size);
 
 #endif

@@ -28,7 +28,7 @@ using std::make_shared;
 using std::shared_ptr;
 using std::istream;
 
-namespace ssharp::deflate
+namespace ssharp::utils::deflate
 {
 	extern buff_pair_t deflateBuff(const buff_pair_t& inpair);
 	extern buff_pair_t inflateBuff(const buff_pair_t& inpair, uint32_t outsize);

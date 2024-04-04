@@ -1,6 +1,6 @@
 #include "stream-loader.h"
 
-namespace ssharp::loader::stream_loader
+namespace ssharp::utils::stream_loader
 {
 	buff_pair_t loadStream(istream& input, size_t pos, size_t size)
 	{
@@ -14,7 +14,7 @@ namespace ssharp::loader::stream_loader
 		}
 		auto buff = std::make_shared<char[]>(size);
 		input.seekg(pos).read(buff.get(), size);
-		return std::make_pair(buff,size);
+		return buff_pair_t(std::move(buff), size);
 	}
 
 	buff_pair_t loadStream(istream&& input, size_t pos, size_t size)

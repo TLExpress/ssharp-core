@@ -28,7 +28,7 @@
 
 using namespace ssharp::exceptions;
 using namespace ssharp::types;
-using namespace ssharp::loader;
+using namespace ssharp::utils;
 
 using std::make_shared;
 using std::bad_alloc;
@@ -38,23 +38,23 @@ using std::istream;
 using std::string;
 using std::ios;
 
-namespace ssharp::parser::utils
+namespace ssharp::parser
 {
 	namespace multi_paths_parser
 	{
-		typedef function<parsed_paths_t(const buff_pair_t&)> multipath_buff_parser;
-		extern parsed_paths_t __SSHARP_PARSERUTILS_DLL parseStream(istream& instream, multipath_buff_parser parseBuff);
-		extern parsed_paths_t __SSHARP_PARSERUTILS_DLL parseStream(istream&& instream, multipath_buff_parser parseBuff);
-		extern parsed_paths_t __SSHARP_PARSERUTILS_DLL parseFile(const string& filename, multipath_buff_parser parseBuff);
+		typedef function<parsed_paths_t(const buff_pair_t&)> multipath_buff_parser_ft;
+		extern parsed_paths_t __SSHARP_PARSERUTILS_DLL parseStream(istream& instream, multipath_buff_parser_ft parseBuff);
+		extern parsed_paths_t __SSHARP_PARSERUTILS_DLL parseStream(istream&& instream, multipath_buff_parser_ft parseBuff);
+		extern parsed_paths_t __SSHARP_PARSERUTILS_DLL parseFile(const string& filename, multipath_buff_parser_ft parseBuff);
 		extern char** __SSHARP_PARSERUTILS_DLL setExporter(const parsed_paths_t& set);
 	}
 
 	namespace single_path_parser
 	{
-		typedef function<string(const buff_pair_t&)> singlepath_buff_parser;
-		extern string __SSHARP_PARSERUTILS_DLL parseStream(istream& input, singlepath_buff_parser parseBuff);
-		extern string __SSHARP_PARSERUTILS_DLL parseStream(istream&& input, singlepath_buff_parser parseBuff);
-		extern string __SSHARP_PARSERUTILS_DLL parseFile(const string& filename, singlepath_buff_parser parseBuff);
+		typedef function<string(const buff_pair_t&)> singlepath_buff_parser_ft;
+		extern string __SSHARP_PARSERUTILS_DLL parseStream(istream& input, singlepath_buff_parser_ft parseBuff);
+		extern string __SSHARP_PARSERUTILS_DLL parseStream(istream&& input, singlepath_buff_parser_ft parseBuff);
+		extern string __SSHARP_PARSERUTILS_DLL parseFile(const string& filename, singlepath_buff_parser_ft parseBuff);
 		extern char* __SSHARP_PARSERUTILS_DLL cstr_copy(const string& str);
 	}
 }
@@ -80,13 +80,13 @@ namespace ssharp::parser::utils
 
 #define __SSHARP_PARSERUTILS_CALL __SSHARP_PARSERUTILS_DLL __SSHARP_PARSERUTILS_CALLTYPE
 
-typedef enum { parser_ok, parser_invalid_io, parser_buffer_error, parser_incorrect_format, parser_no_path_to_parse, parser_unknown_error } parser_result;
+typedef enum { parser_ok, parser_invalid_io, parser_buffer_error, parser_incorrect_format, parser_no_path_to_parse, parser_unknown_error } parser_result_t;
 
-typedef parser_result(*multi_parseBuff_f)(char* buff, size_t size, char*** set, int* set_size);
-typedef parser_result(*single_parseBuff_f)(char* buff, size_t size, char** str);
+typedef parser_result_t(*multi_parseBuff_ft)(char* buff, size_t size, char*** set, int* set_size);
+typedef parser_result_t(*single_parseBuff_ft)(char* buff, size_t size, char** str);
 
-__SSHARP_PARSERUTILS_EXT parser_result __SSHARP_PARSERUTILS_CALL ssmulti_parseFilePtr(FILE* file, char*** set, int* set_size, multi_parseBuff_f parseBuff);
-__SSHARP_PARSERUTILS_EXT parser_result __SSHARP_PARSERUTILS_CALL ssmulti_parseFile(char* filename, char*** set, int* set_size, multi_parseBuff_f parseBuff);
-__SSHARP_PARSERUTILS_EXT parser_result __SSHARP_PARSERUTILS_CALL sssingle_parseFilePtr(FILE* file, char** str, single_parseBuff_f parseBuff);
-__SSHARP_PARSERUTILS_EXT parser_result __SSHARP_PARSERUTILS_CALL sssingle_parseFile(char* filename, char** str, single_parseBuff_f parseBuff);
+__SSHARP_PARSERUTILS_EXT parser_result_t __SSHARP_PARSERUTILS_CALL ssmulti_parseFilePtr(FILE* file, char*** set, int* set_size, multi_parseBuff_ft parseBuff);
+__SSHARP_PARSERUTILS_EXT parser_result_t __SSHARP_PARSERUTILS_CALL ssmulti_parseFile(char* filename, char*** set, int* set_size, multi_parseBuff_ft parseBuff);
+__SSHARP_PARSERUTILS_EXT parser_result_t __SSHARP_PARSERUTILS_CALL sssingle_parseFilePtr(FILE* file, char** str, single_parseBuff_ft parseBuff);
+__SSHARP_PARSERUTILS_EXT parser_result_t __SSHARP_PARSERUTILS_CALL sssingle_parseFile(char* filename, char** str, single_parseBuff_ft parseBuff);
 #endif

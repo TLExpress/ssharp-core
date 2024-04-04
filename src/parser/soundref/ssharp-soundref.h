@@ -26,8 +26,8 @@
 
 using namespace ssharp::exceptions;
 using namespace ssharp::types;
-using namespace ssharp::loader;
-using namespace ssharp::parser::utils;
+using namespace ssharp::utils;
+using namespace ssharp::parser;
 
 using std::make_unique;
 using std::bad_alloc;
@@ -65,6 +65,6 @@ namespace ssharp::parser::soundref
 #endif
 
 // export zone :D
-__SSHARP_SOUNDREF_EXT parser_result __SSHARP_SOUNDREF_CALL sssoundref_parseBuff(char* buff, size_t size, char** str);
+__SSHARP_SOUNDREF_EXT parser_result_t __SSHARP_SOUNDREF_CALL sssoundref_parseBuff(char* buff, size_t size, char** str);
 
 #endif

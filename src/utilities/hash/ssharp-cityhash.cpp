@@ -1,6 +1,6 @@
 ﻿#include "ssharp-cityhash.h"
 
-namespace ssharp::cityhash
+namespace ssharp::utils::cityhash
 {
 	uint64_t __stdcall SSHARP_CITYHASH_DLL hash(const string& str)
 	{
@@ -20,5 +20,5 @@ uint64_t __stdcall SSHARP_CITYHASH_DLL sSharpHash(const char* str, size_t len)
 
 uint64_t __stdcall SSHARP_CITYHASH_DLL sSharpHashSalt(char* str, const size_t len, const uint16_t salt)
 {
-	return salt ? ssharp::cityhash::hash(string(str, len) + std::to_string(salt)) : CityHash64(str, len);
+	return salt ? ssharp::utils::cityhash::hash(string(str, len) + std::to_string(salt)) : CityHash64(str, len);
 }

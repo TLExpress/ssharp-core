@@ -27,8 +27,8 @@
 
 using namespace ssharp::types;
 using namespace ssharp::exceptions;
-using namespace ssharp::loader;
-using namespace ssharp::parser::utils;
+using namespace ssharp::utils;
+using namespace ssharp::parser;
 
 using std::make_unique;
 using std::bad_alloc;
@@ -67,6 +67,6 @@ namespace ssharp::parser::sii
 #endif
 
 // export zone :D
-__SSHARP_SII_EXT parser_result __SSHARP_SII_CALL sssii_parseBuff(char* buff, size_t size, char*** set, int* set_size);
+__SSHARP_SII_EXT parser_result_t __SSHARP_SII_CALL sssii_parseBuff(char* buff, size_t size, char*** set, int* set_size);
 
 #endif

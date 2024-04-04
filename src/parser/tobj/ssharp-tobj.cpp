@@ -34,11 +34,11 @@ namespace ssharp::parser::tobj
 
 using namespace ssharp::parser::tobj;
 
-parser_result __SSHARP_TOBJ_CALLTYPE sstobj_parseBuff(char* buff, size_t size, char** str)
+parser_result_t __SSHARP_TOBJ_CALLTYPE sstobj_parseBuff(char* buff, size_t size, char** str)
 {
 	try
 	{
-		*str = single_path_parser::cstr_copy(parseBuff(std::make_pair(buff_t(buff), size)));
+		*str = single_path_parser::cstr_copy(parseBuff(buff_pair_t(buff,size)));
 	}
 	catch (incorrect_format e)
 	{

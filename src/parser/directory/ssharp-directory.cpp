@@ -24,12 +24,12 @@ namespace ssharp::parser::directory
 
 using namespace ssharp::parser::directory;
 
-parser_result __SSHARP_DIRECTORY_CALLTYPE ssdirectory_parseBuff(char* buff, size_t size, char*** set, int* set_size)
+parser_result_t __SSHARP_DIRECTORY_CALLTYPE ssdirectory_parseBuff(char* buff, size_t size, char*** set, int* set_size)
 {
 	try
 	{
 		*set = nullptr;
-		auto&& t_set = parseBuff(std::make_pair(buff_t(buff), size));
+		auto&& t_set = parseBuff(buff_pair_t(buff,size));
 		if (!t_set.size())
 			return parser_no_path_to_parse;
 		*set = multi_paths_parser::setExporter(t_set);

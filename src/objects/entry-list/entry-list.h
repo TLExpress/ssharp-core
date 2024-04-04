@@ -16,8 +16,10 @@
 #include <list>
 #include "entry-objects.h"
 #include "path-spliter.h"
+#include "nonabsentable.h"
 
 using namespace ssharp::entry_objects;
+using namespace ssharp::dictionary;
 
 namespace ssharp::entry_list
 {

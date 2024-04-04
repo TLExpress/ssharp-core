@@ -24,6 +24,7 @@
 
 #include "types.h"
 #include "exceptions.h"
+#include "transcoder-utils.h"
 
 using namespace ssharp::exceptions;
 using namespace ssharp::types;
@@ -74,12 +75,8 @@ namespace ssharp::_3nk
 	class __SSHARP_3NK_DLL transcoder
 	{
 	protected:
-		typedef function<buff_pair_t(const buff_pair_t&)> streamRoutine;
-		typedef function<void(istream&&, ostream&)> fileRoutine;
 		static void transcodeBuffer(const buff_t inbuff, buff_t outbuff, const size_t size, const int64_t seed);
 		static void transcodeBuffer(const buff_t buff, const size_t size, const int64_t seed);
-		static void processStream(istream& input, ostream& output, streamRoutine routine);
-		static void processFile(const string& inFileName, const string& outFileName, fileRoutine routine);
 
 	public:
 		static bool is3nKFileBuff(const buff_pair_t& inpair);
@@ -92,18 +89,6 @@ namespace ssharp::_3nk
 		static buff_pair_t encodeFileBuff(const buff_pair_t& inpair, bool nodelete);
 		static buff_pair_t decodeFileBuff(const buff_pair_t& inpair, bool nodelete);
 		static buff_pair_t transcodeFileBuff(const buff_pair_t& inpair, bool nodelete);
-		template<typename Istream, typename Ostream>
-		static void encodeStream(Istream&& input, Ostream&& output);
-		template<typename Istream, typename Ostream>
-		static void decodeStream(Istream&& input, Ostream&& output);
-		template<typename Istream, typename Ostream>
-		static void transcodeStream(Istream&& input, Ostream&& output);
-		static void encodeFile(const string& FileName, const string& outFileName);
-		static void decodeFile(const string& inFileName, const string& outFileName);
-		static void transcodeFile(const string& inFileName, const string& outFileName);
-		static void encodeFile(const string& FileName);
-		static void decodeFile(const string& FileName);
-		static void transcodeFile(const string& FileName);
 	};
 }
 #endif
@@ -120,17 +105,10 @@ namespace ssharp::_3nk
 #endif
 
 // export zone :D
-typedef enum { s3_ok, s3_invalid_io, s3_buffer_error, s3_incorrect_format, s3_unknown_error } s3_result;
 __SSHARP_3NK_EXT bool __stdcall ss3nk_is3nKFileBuff(char* buff, size_t size);
 __SSHARP_3NK_EXT bool __stdcall ss3nk_is3nkFilePtr(FILE* file);
 __SSHARP_3NK_EXT bool __stdcall ss3nk_is3nKFile(char* FileName);
-__SSHARP_3NK_EXT int __stdcall ss3nk_encodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
-__SSHARP_3NK_EXT int __stdcall ss3nk_decodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
-__SSHARP_3NK_EXT int __stdcall ss3nk_transcodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
-__SSHARP_3NK_EXT int __stdcall ss3nk_encodeFilePtr(FILE* infile, FILE* outfile);
-__SSHARP_3NK_EXT int __stdcall ss3nk_decodeFilePtr(FILE* infile, FILE* outfile);
-__SSHARP_3NK_EXT int __stdcall ss3nk_transcodeFilePtr(FILE* infile, FILE* outfile);
-__SSHARP_3NK_EXT int __stdcall ss3nk_encodeFile(char* inFileName, char* outFileName);
-__SSHARP_3NK_EXT int __stdcall ss3nk_decodeFile(char* inFileName, char* outFileName);
-__SSHARP_3NK_EXT int __stdcall ss3nk_transcodeFile(char* inFileName, char* outFileName);
+__SSHARP_3NK_EXT transcoder_result_t __stdcall ss3nk_encodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
+__SSHARP_3NK_EXT transcoder_result_t __stdcall ss3nk_decodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
+__SSHARP_3NK_EXT transcoder_result_t __stdcall ss3nk_transcodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
 #endif

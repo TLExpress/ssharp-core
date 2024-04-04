@@ -1,8 +1,11 @@
+
 #include "ssharp-hashfs.h"
-#include <sstream>
-#include <iostream>
+using std::string;
+using namespace ssharp::fs;
+
 int main()
 {
-	ssharp::fs::hashfs::loadFile("C:\\Users\\unive\\Documents\\Euro Truck Simulator 2\\mod\\50k_addons.converted.scs");
+	auto&& s = hashfs::loadFile("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Euro Truck Simulator 2\\base.scs");
 	system("pause");
 }
+

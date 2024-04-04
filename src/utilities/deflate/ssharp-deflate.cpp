@@ -1,6 +1,6 @@
 #include "ssharp-deflate.h"
 
-namespace ssharp::deflate
+namespace ssharp::utils::deflate
 {
 #define checkSuccess(x) if(x)throw unsuccess_zlib_operation("zlib operation not success")
     buff_pair_t deflateBuff(const buff_pair_t& inpair)
@@ -45,7 +45,7 @@ namespace ssharp::deflate
         outsize = stream.total_out;
         deflateEnd(&stream);
         checkSuccess(!Z_STREAM_END);
-        return std::make_pair(outbuff, outsize);
+        return buff_pair_t(std::move(outbuff), outsize);
 	}
 
     buff_pair_t inflateBuff(const buff_pair_t& inpair, uint32_t outsize)
@@ -105,7 +105,7 @@ namespace ssharp::deflate
 
         inflateEnd(&stream);
         checkSuccess(err != Z_STREAM_END);
-        return std::make_pair(outbuff, outsize);
+        return buff_pair_t(std::move(outbuff),outsize);
     }
 
     uint32_t crc32Buff(const buff_pair_t& inpair)
