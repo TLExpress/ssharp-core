@@ -24,27 +24,42 @@ using namespace ssharp::dictionary;
 namespace ssharp::entry_list
 {
 	typedef filter_ft<nabptr_obj<basic_obj>> list_filter_f;
-	class entry_list : public vector<nabptr_obj<basic_obj>>  //做成派生類，並把方法分發到各種格式
+	typedef sorter_ft<nabptr_obj<basic_obj>> list_sorter_f;
+	class entry_list_t : public vector<nabptr_obj<basic_obj>>  //做成派生類，並把方法分發到各種格式
 	{
+		uint64_t salt=0;
 	public:
 		using vector<nabptr_obj<basic_obj>>::vector;
 
 		parsed_paths_t parseBuff(list_filter_f filter);
 		size_t findNameFromDic(dictionary_t dic);
 		size_t findNameFromDic(list_filter_f filter, dictionary_t dic);
+		void setHashFromName(list_filter_f filter);// {}//
 		size_t identByName(list_filter_f filter);
 		bool rmNameFromDir(const string& name);
 		int addNameToDir(const string& name);
-		entry_list find_if(list_filter_f filter);
-		entry_list& load(list_filter_f filter);
-		entry_list& loadBuff(list_filter_f filter);
-		entry_list& unload(list_filter_f filter);
-		entry_list& commit(list_filter_f filter);
-		entry_list& rebuildDir();
-		entry_list& rmEmptyDir();
-		entry_list& rmUnesEntDir();
-		entry_list& rmEntFromDir(list_filter_f filter);
-		entry_list& remove_if(list_filter_f filter);
+
+		size_t hashfsInit();
+		size_t zipfsInit();
+		size_t sysfsInit();
+		size_t namelistInit();
+
+		entry_list_t find_if(list_filter_f filter);
+		entry_list_t& load(list_filter_f filter);
+		entry_list_t& loadUnloaded();
+		entry_list_t& loadBuff(list_filter_f filter);
+		entry_list_t& unload(list_filter_f filter);
+		entry_list_t& commit(list_filter_f filter);
+		entry_list_t& rebuildDir();
+		entry_list_t& rmEmptyDir();
+		entry_list_t& rmUnesEntDir();
+		entry_list_t& rmEntFromDir(list_filter_f filter);
+		entry_list_t& remove_if(list_filter_f filter);
+		entry_list_t& sort(list_sorter_f sorter);
+		entry_list_t& sortByHash();
+		entry_list_t& sortByName();
+		uint16_t getSalt();
+		entry_list_t& changeSalt();
 	};
 }
 

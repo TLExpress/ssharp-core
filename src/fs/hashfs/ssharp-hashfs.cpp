@@ -3,16 +3,16 @@
 namespace ssharp::fs::hashfs
 {
 
-	entry_list::entry_list SSHARP_HASHFS_DLL ssharp::fs::hashfs::loadFile(const string& filename)
+	entry_list_t loadFile(const string& filename)
 	{
-		entry_list::entry_list list;
+		entry_list_t list;
 		std::ifstream file(filename, ios::in | ios::binary);
 		header_t header = {};
 		file.read((char*)&header, sizeof(header));
 		file.seekg(header.offset);
 		for (uint32_t c = 0; c < header.entries_count; c++)
 		{
-			entry_t entry = {};
+			entry_t entry;
 			file.read((char*)&entry, sizeof(entry));
 			buff_t buff = make_shared<char[]>(entry.zsize);
 			auto pos = file.tellg();
@@ -42,5 +42,39 @@ namespace ssharp::fs::hashfs
 			list.push_back(is_directory ? directory_obj(std::move(content)) : basic_obj(std::move(content)));
 		}
 		return list;
+	}
+	void storeFile(const string& filename, const entry_list_t& list)
+	{
+		auto tlist(list);
+		tlist.hashfsInit();
+		header_t header;
+		header.salt = tlist.getSalt();
+		header.entries_count = tlist.size();
+		header.offset = 0x20;//¼È®É
+		ofstream file(filename, ios::out | ios::binary);
+		file.write((char*)&header, sizeof(header));
+		for (auto const& tentry : tlist)
+		{
+			entry_t entry(tentry);
+			file.write((char*)&entry, sizeof(entry));
+		}
+		for (auto const& tentry : tlist)
+		{
+			file.write((char*)&tentry->getModified().zlib_header.get(), sizeof(zlib_header_t));
+			if (tentry->getModified().source_type == memory)
+			{
+				auto& buff = tentry->getModified().mbuff.get();
+				file.write(buff, buff);
+			}
+			else
+			{
+				auto const& obj = tentry->getModified();
+				buff_pair_t buff(*obj.zsize);
+				ifstream sfile(*tentry->getModified().source_name, ios::in | ios::binary);
+				sfile.seekg(*obj.source_pos).read(buff,buff);
+				file.write(buff, buff);
+			}
+			file.write((char*)&tentry->getModified().adler32.get(), sizeof(uint32_t));
+		}
 	}
 }

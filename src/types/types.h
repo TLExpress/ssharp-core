@@ -29,6 +29,8 @@ namespace ssharp::types
 	//typedef std::map<uint64_t, std::string> dictionary_t;
 	template<typename T>
 	using filter_ft = std::function<bool(const T&)>;
+	template<typename T>
+	using sorter_ft = std::function<bool(const T&, const T&)>;
 	typedef struct
 	{
 		uint8_t cmf;
@@ -55,6 +57,7 @@ namespace ssharp::types
 		}
 		buff_t& operator*() { return first; }
 		const buff_t& operator*() const { return first; }
+		operator const size_t() const { return second; }
 		operator size_t() { return second; }
 		operator const buff_t&() const { return first; }
 		operator buff_t&() { return first; }

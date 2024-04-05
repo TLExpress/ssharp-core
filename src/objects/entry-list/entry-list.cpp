@@ -2,12 +2,12 @@
 
 namespace ssharp::entry_list
 {
-	size_t entry_list::findNameFromDic(dictionary_t dic)
+	size_t entry_list_t::findNameFromDic(dictionary_t dic)
 	{
 		return findNameFromDic([](const nabptr_obj<basic_obj>&) {return true; }, dic);
 	}
 
-	size_t entry_list::findNameFromDic(list_filter_f filter, dictionary_t dic)
+	size_t entry_list_t::findNameFromDic(list_filter_f filter, dictionary_t dic)
 	{
 		size_t ret=0;
 		for (auto & entry : find_if(filter))
@@ -15,7 +15,7 @@ namespace ssharp::entry_list
 		return ret;
 	}
 
-	size_t entry_list::identByName(list_filter_f filter)
+	size_t entry_list_t::identByName(list_filter_f filter)
 	{
 		size_t ret=0;
 		for (auto& entry : find_if(filter))
@@ -44,35 +44,41 @@ namespace ssharp::entry_list
 		return ret;
 	}
 
-	entry_list& entry_list::load(list_filter_f filter)
+	entry_list_t& entry_list_t::load(list_filter_f filter)
 	{
 		for (auto& entry : find_if(filter))
 			entry->load();
 		return *this;
 	}
 
-	entry_list& entry_list::loadBuff(list_filter_f filter)
+	entry_list_t& entry_list_t::loadUnloaded()
+	{
+		load([](const nabptr_obj<basic_obj>& rhs) {return !rhs->loaded(); });
+		return *this;
+	}
+
+	entry_list_t& entry_list_t::loadBuff(list_filter_f filter)
 	{
 		for (auto& entry : find_if(filter))
 			entry->getModified().loadBuff();
 		return *this;
 	}
 
-	entry_list& entry_list::unload(list_filter_f filter)
+	entry_list_t& entry_list_t::unload(list_filter_f filter)
 	{
 		for (auto& entry : find_if(filter))
 			entry->unload();
 		return *this;
 	}
 
-	entry_list& entry_list::commit(list_filter_f filter)
+	entry_list_t& entry_list_t::commit(list_filter_f filter)
 	{
 		for (auto& entry : find_if(filter))
 			entry->commit();
 		return *this;
 	}
 
-	parsed_paths_t entry_list::parseBuff(list_filter_f filter)
+	parsed_paths_t entry_list_t::parseBuff(list_filter_f filter)
 	{
 		parsed_paths_t ret;
 		for (auto& entry : find_if(filter))
@@ -116,16 +122,16 @@ namespace ssharp::entry_list
 		return ret;
 	}
 
-	entry_list entry_list::find_if(list_filter_f filter)
+	entry_list_t entry_list_t::find_if(list_filter_f filter)
 	{
-		entry_list sub;
+		entry_list_t sub;
 		for (auto & entry : *this)
 			if (filter(*entry))
 				sub.push_back(entry);
 		return sub;
 	}
 
-	entry_list& entry_list::remove_if(list_filter_f filter)
+	entry_list_t& entry_list_t::remove_if(list_filter_f filter)
 	{
 		for (auto const& e : find_if(filter))
 			if (e->getModified().filename.attend())
@@ -134,7 +140,7 @@ namespace ssharp::entry_list
 		return *this;
 	}
 
-	entry_list& entry_list::rmEmptyDir()
+	entry_list_t& entry_list_t::rmEmptyDir()
 	{
 		erase(std::remove_if(this->begin(), this->end(), [](const nabptr_obj<basic_obj>& obj) {
 			auto pdir = dynamic_cast< const directory_obj*>(&(*obj));
@@ -143,7 +149,7 @@ namespace ssharp::entry_list
 		return *this;
 	}
 
-	entry_list& entry_list::rebuildDir()
+	entry_list_t& entry_list_t::rebuildDir()
 	{
 		size_t add = 0;
 		do
@@ -161,7 +167,7 @@ namespace ssharp::entry_list
 		return *this;
 	}
 
-	bool entry_list::rmNameFromDir(const string& name)
+	bool entry_list_t::rmNameFromDir(const string& name)
 	{
 		auto&& name_pair = ssharp::utils::path_spliter::splitPath(name);
 		auto&& dir_list = find_if([&name_pair](const nabptr_obj<basic_obj>& obj) {
@@ -176,7 +182,7 @@ namespace ssharp::entry_list
 		return ret;
 	}
 
-	int entry_list::addNameToDir(const string& name)
+	int entry_list_t::addNameToDir(const string& name)
 	{
 		auto&& name_pair = ssharp::utils::path_spliter::splitPath(name);
 		auto&& dir_list = find_if([&name_pair](const nabptr_obj<basic_obj>& obj) {
@@ -191,7 +197,7 @@ namespace ssharp::entry_list
 		return ret;
 	}
 
-	entry_list& entry_list::rmEntFromDir(list_filter_f filter)
+	entry_list_t& entry_list_t::rmEntFromDir(list_filter_f filter)
 	{
 		for (auto const& e : find_if(filter))
 			if(e->getModified().filename.attend())
@@ -199,7 +205,7 @@ namespace ssharp::entry_list
 		return *this;
 	}
 
-	entry_list& entry_list::rmUnesEntDir() //沒做
+	entry_list_t& entry_list_t::rmUnesEntDir() //沒做
 	{
 		return *this;
 	}

@@ -33,7 +33,7 @@ namespace ssharp::containers
 		bool attend() const { return this->value != nullptr; }
 		bool absent() const { return this->value == nullptr; }
 		void unload() { this->value.reset(); }
-
+		using bptr_obj<T>::operator=;
 		abs_obj& operator=(const abs_obj& rhs) {
 			this->set(rhs);
 			return *this;

@@ -50,8 +50,8 @@ namespace ssharp::entry_objects
 	protected:
 		content_t source;
 		abs_obj<content_t> modified;
+		basic_obj(){}
 	public:
-		basic_obj() = delete;
 		basic_obj(const basic_obj& rhs);
 		basic_obj(basic_obj&& rhs)  noexcept;
 		basic_obj(const content_t& source);
@@ -71,6 +71,10 @@ namespace ssharp::entry_objects
 		virtual void unload();
 		virtual void reload();
 		virtual void commit();
+		//virtual bool hashfsInit() { return false; }//
+		//virtual bool zipfsInit() { return false; }//
+		//virtual bool namelistInit() { return false; }//
+		//virtual bool sysfsInit() { return false; }//
 		virtual void setHashFromName();
 		virtual bool setNameFromDictionary(const dictionary_t& dictionary);
 		virtual void changeHashSalt(uint16_t salt);
@@ -113,7 +117,7 @@ namespace ssharp::entry_objects
 		parsed_paths_t content_list;
 		virtual parsed_paths_t parseBuff() override;
 		virtual bool isDirectory()override { return false; };
-		directory_obj(parsed_paths_t);
+		directory_obj(const parsed_paths_t&) {}//
 		directory_obj(const basic_obj& rhs) : basic_obj(rhs) {}
 		directory_obj(basic_obj&& rhs) : basic_obj(std::move(rhs)) {}
 		bool insertEntry(const string& entry);

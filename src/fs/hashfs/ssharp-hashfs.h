@@ -20,16 +20,16 @@ using namespace ssharp::entry_list;
 
 namespace ssharp::fs::hashfs
 {
-	typedef struct
+	struct header_t
 	{
-		uint32_t sign;
-		uint16_t version;
-		uint16_t salt;
-		uint32_t method;
-		uint32_t entries_count;
-		uint64_t offset;
-		uint64_t v_offset;
-	}header_t;
+		uint32_t sign = 0x23534353U;
+		uint16_t version = 1;
+		uint16_t salt = 0;
+		uint32_t method = 0x59544943;
+		uint32_t entries_count=0;
+		uint64_t offset=0;
+		uint64_t v_offset=0;
+	};
 
 	enum hashfs_entry_flags_t : uint32_t
 	{
@@ -39,17 +39,28 @@ namespace ssharp::fs::hashfs
 		encrypted = 0x8
 	};
 	
-	typedef struct
+	struct entry_t
 	{
-		uint64_t hash;
-		uint64_t offset;
-		hashfs_entry_flags_t flags;
-		uint32_t crc;
-		uint32_t size;
-		uint32_t zsize;
-	}entry_t;
+		uint64_t hash=0;
+		uint64_t offset=0;
+		uint32_t flags=0;
+		uint32_t crc=0;
+		uint32_t size=0;
+		uint32_t zsize=0;
+		entry_t() {}
+		entry_t(const basic_obj& entry) {
+			auto const& obj = entry.getModified();
+			hash = obj.hash;
+			offset = obj.offset;
+			flags=(obj.is_directory)|(obj.compressed<<1)|(obj.varify<<2)|(obj.encrypted<<3);
+			crc = obj.crc32;
+			size = obj.size;
+			zsize = obj.zsize+sizeof(zlib_header_t)+sizeof(uint32_t);
+		}
+	};
 
-	extern entry_list::entry_list SSHARP_HASHFS_DLL loadFile(const string& filename);
+	extern entry_list_t SSHARP_HASHFS_DLL loadFile(const string& filename);
+	extern void SSHARP_HASHFS_DLL storeFile(const string& filename,const entry_list_t& list);
 }
 
 #endif

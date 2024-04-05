@@ -44,7 +44,7 @@ namespace ssharp::types
 		abs_obj<size_t> source_size;
 		abs_obj<uint32_t> crc32;
 		uint32_t size = 0;
-		uint32_t zsize = 0;
+		abs_obj<uint32_t> zsize = 0;
 		bool is_directory = false;
 		bool compressed = false;
 		bool varify = false;
@@ -52,6 +52,7 @@ namespace ssharp::types
 		abs_obj<zlib_header_t> zlib_header;
 		abs_obj<uint32_t> adler32;
 		abs_obj<buff_pair_t> mbuff;
+		abs_obj<uint64_t>offset;
 		content_t& operator=(const content_t& rhs)
 		{
 			this->source_type = rhs.source_type;

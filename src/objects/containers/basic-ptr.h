@@ -51,6 +51,8 @@ namespace ssharp::containers
 			this->set(std::move(rhs));
 			return this->get();
 		}
+		operator T& () { return this->get(); }
+		operator const T& () const { return this->get(); }
 	};
 }
 

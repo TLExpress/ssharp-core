@@ -55,13 +55,19 @@ namespace ssharp::entry_objects
 	void basic_obj::compress()
 	{
 		if (!isCompressed())
+		{
 			modified->mbuff = deflateBuff(*modified->mbuff);
+			modified->zsize = modified->mbuff->second;
+		}
 	}
 
 	void basic_obj::uncompress()
 	{
 		if (isCompressed())
-			modified->mbuff = inflateBuff(*modified->mbuff,modified->size);
+		{
+			modified->mbuff = inflateBuff(*modified->mbuff, modified->size);
+			modified->zsize = modified->mbuff->second;
+		}
 	}
 	
 	void basic_obj::load()
@@ -184,14 +190,22 @@ namespace ssharp::entry_objects
 
 	void sii_obj::encode()
 	{
-		if(!isEncoded())
+		if (!isEncoded())
+		{
 			modified->mbuff = ssharp::_3nk::transcoder::encodeFileBuff(*modified->mbuff);
+			modified->size = (uint32_t)modified->mbuff->second;
+			modified->zsize.unload();
+		}
 	}
 
 	void sii_obj::decode()
 	{
 		if (isEncoded())
+		{
 			modified->mbuff = ssharp::_3nk::transcoder::decodeFileBuff(*modified->mbuff);
+			modified->size = (uint32_t)modified->mbuff->second;
+			modified->zsize.unload();
+		}
 	}
 
 	parsed_paths_t directory_obj::parseBuff()

@@ -27,36 +27,6 @@ using std::map;
 
 namespace ssharp::dictionary
 {
-	const parsed_paths_t init_list({
-		"/",
-		"/asset",
-		"/automat",
-		"/autoexec.cfg",
-		"/contentbrowser",
-		"/custom",
-		"/def",
-		"/defpaintjobonly.vbs",
-		"/dlc",
-		"/effect",
-		"/font",
-		"/locale",
-		"/map"
-		"/material",
-		"/matlib",
-		"/mod3l",
-		"/model",
-		"/model2",
-		"/prefab",
-		"/prefab2",
-		"/road_template",
-		"/sound",
-		"/system",
-		"/ui",
-		"/unit",
-		"/vehicle",
-		"/video",
-		"/version.txt",
-		});
 	struct dictionary_t : public map<uint64_t, string>
 	{
 		using map<uint64_t, string>::map;
@@ -98,6 +68,37 @@ namespace ssharp::dictionary
 	private:
 		uint16_t salt=0;
 	};
+
+	const parsed_paths_t init_list({
+		"/",
+		"/asset",
+		"/automat",
+		"/autoexec.cfg",
+		"/contentbrowser",
+		"/custom",
+		"/def",
+		"/defpaintjobonly.vbs",
+		"/dlc",
+		"/effect",
+		"/font",
+		"/locale",
+		"/map"
+		"/material",
+		"/matlib",
+		"/mod3l",
+		"/model",
+		"/model2",
+		"/prefab",
+		"/prefab2",
+		"/road_template",
+		"/sound",
+		"/system",
+		"/ui",
+		"/unit",
+		"/vehicle",
+		"/video",
+		"/version.txt",
+		});
 }
 
 #endif
