@@ -31,14 +31,14 @@ namespace ssharp::fs::hashfs
 		uint64_t v_offset=0;
 	};
 
-	enum hashfs_entry_flags_t : uint32_t
+	/*enum hashfs_entry_flags_t : uint32_t
 	{
 		is_directory = 0x1,
 		is_compressed = 0x2,
 		varify = 0x4,
 		encrypted = 0x8
-	};
-	
+	};*/
+
 	struct entry_t
 	{
 		uint64_t hash=0;

@@ -97,15 +97,15 @@ namespace ssharp::types
 		}
 		buff_pair_t getBuff(size_t size) {
 			if (mbuff.attend())
-				return *mbuff;
-			return stream_loader::loadStream(ifstream(*filename, ios::in | ios::binary), *source_pos, size);
+				return mbuff;
+			return stream_loader::loadStream(ifstream(filename, ios::in | ios::binary), source_pos, size);
 		}
 		buff_pair_t loadBuff() {
 			if (source_type == memory)
-				return *mbuff;
-			mbuff = stream_loader::loadStream(ifstream(*filename, ios::in | ios::binary), *source_pos, *source_size);
+				return mbuff;
+			mbuff = stream_loader::loadStream(ifstream(filename, ios::in | ios::binary), source_pos, source_size);
 			source_type = memory;
-			return *mbuff;
+			return mbuff;
 		}
 	};
 }

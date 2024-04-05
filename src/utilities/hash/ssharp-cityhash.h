@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#ifndef SSHARP_CITYHASH_H
-#define SSHARP_CITYHASH_H
+#ifndef __SSHARP_CITYHASH_H
+#define __SSHARP_CITYHASH_H
 
 #ifdef _WINDLL
 #ifdef SSHARP_CITYHASH
@@ -10,7 +10,7 @@
 #define SSHARP_CITYHASH_DLL __declspec(dllimport)
 #endif
 #else
-#define SSHARP_CITYHASH_DLL
+#define __SSHARP_CITYHASH_DLL
 #endif
 
 #ifdef __cplusplus
@@ -32,16 +32,26 @@ using std::ostream;
 
 namespace ssharp::utils::cityhash
 {
-	extern uint64_t __stdcall SSHARP_CITYHASH_DLL hash(const string& str);
-	extern uint64_t __stdcall SSHARP_CITYHASH_DLL hashSalt(const string& str, uint16_t salt);
+	extern uint64_t __SSHARP_CITYHASH_DLL hash(const string& str);
+	extern uint64_t __SSHARP_CITYHASH_DLL hashSalt(const string& str, uint16_t salt);
 }
 
-extern
-#ifdef __cplusplus
-"C"
+#ifdef _WIN32
+#define __SSHARP_CITYHASH_CALLTYPE __stdcall
+#else
+#define __SSHARP_CITYHASH_CALLTYPE
 #endif
-{
-	uint64_t __stdcall SSHARP_CITYHASH_DLL sSharpHash(const char* str, size_t len);
-	uint64_t __stdcall SSHARP_CITYHASH_DLL sSharpHashSalt(const char* str, size_t len, uint16_t salt);
-}
+
+#define __SSHARP_CITYHASH_CALL __SSHARP_CITYHASH_DLL __SSHARP_CITYHASH_CALLTYPE
+
+#ifdef __cplusplus
+#define __SSHARP_CITYHASH_EXT extern "C"
+#else
+#define __SSHARP_CITYHASH_EXT extern
+#include <stdio.h>
+#endif
+
+__SSHARP_CITYHASH_EXT uint64_t __SSHARP_CITYHASH_CALL ssHash(const char* str, size_t len);
+__SSHARP_CITYHASH_EXT uint64_t __SSHARP_CITYHASH_CALL ssHashSalt(const char* str, size_t len, uint16_t salt);
+
 #endif

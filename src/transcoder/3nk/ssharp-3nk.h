@@ -86,9 +86,6 @@ namespace ssharp::_3nk
 		static buff_pair_t encodeFileBuff(const buff_pair_t& inpair);
 		static buff_pair_t decodeFileBuff(const buff_pair_t& inpair);
 		static buff_pair_t transcodeFileBuff(const buff_pair_t& inpair);
-		static buff_pair_t encodeFileBuff(const buff_pair_t& inpair, bool nodelete);
-		static buff_pair_t decodeFileBuff(const buff_pair_t& inpair, bool nodelete);
-		static buff_pair_t transcodeFileBuff(const buff_pair_t& inpair, bool nodelete);
 	};
 }
 #endif
@@ -104,11 +101,18 @@ namespace ssharp::_3nk
 #include <stdlib.h>
 #endif
 
+#ifdef _WIN32
+#define __SSHARP_3NK_CALLTYPE __stdcall
+#else
+#define __SSHARP_3NK_CALLTYPE
+#endif
+#define __SSHARP_3NK_CALL __SSHARP_3NK_DLL __SSHARP_3NK_CALLTYPE
+
 // export zone :D
-__SSHARP_3NK_EXT bool __stdcall ss3nk_is3nKFileBuff(char* buff, size_t size);
-__SSHARP_3NK_EXT bool __stdcall ss3nk_is3nkFilePtr(FILE* file);
-__SSHARP_3NK_EXT bool __stdcall ss3nk_is3nKFile(char* FileName);
-__SSHARP_3NK_EXT transcoder_result_t __stdcall ss3nk_encodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
-__SSHARP_3NK_EXT transcoder_result_t __stdcall ss3nk_decodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
-__SSHARP_3NK_EXT transcoder_result_t __stdcall ss3nk_transcodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
+__SSHARP_3NK_EXT bool __SSHARP_3NK_CALL ss3nk_is3nKFileBuff(char* buff, size_t size);
+__SSHARP_3NK_EXT bool __SSHARP_3NK_CALL ss3nk_is3nkFilePtr(FILE* file);
+__SSHARP_3NK_EXT bool __SSHARP_3NK_CALL ss3nk_is3nKFile(char* FileName);
+__SSHARP_3NK_EXT transcoder_result_t __SSHARP_3NK_DLL ss3nk_encodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
+__SSHARP_3NK_EXT transcoder_result_t __SSHARP_3NK_DLL ss3nk_decodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
+__SSHARP_3NK_EXT transcoder_result_t __SSHARP_3NK_DLL ss3nk_transcodeFileBuff(char* inbuff, size_t insize, char** outbuff, size_t* outsize);
 #endif

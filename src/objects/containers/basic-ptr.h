@@ -1,14 +1,14 @@
-#ifndef SSHARP_BPTR_H
-#define SSHARP_BPTR_H
+#ifndef __SSHARP_BPTR_H
+#define __SSHARP_BPTR_H
 
 #ifdef _WINDLL
-#ifdef SSHARP_BPTR
-#define SSHARP_BPTR_DLL __declspec(dllexport)
-#elseabs_obj
-#define SSHARP_BPTR_DLL __declspec(dllimport)
+#ifdef __SSHARP_BPTR
+#define __SSHARP_BPTR_DLL __declspec(dllexport)
+#else
+#define __SSHARP_BPTR_DLL __declspec(dllimport)
 #endif
 #else
-#define SSHARP_BPTR_DLL
+#define __SSHARP_BPTR_DLL
 #endif
 
 #include "types.h"
@@ -20,7 +20,7 @@ using std::make_shared;
 namespace ssharp::containers
 {
 	template<typename T>
-	class bptr_obj
+	class __SSHARP_BPTR_DLL bptr_obj
 	{
 	protected:
 		std::shared_ptr<T> value = nullptr;
@@ -28,6 +28,8 @@ namespace ssharp::containers
 	public:
 		bptr_obj(const T& rhs) { set(rhs); }
 		bptr_obj(T&& rhs) { set(std::move(rhs)); }
+		bptr_obj(const bptr_obj&) = delete;
+		bptr_obj(bptr_obj&&) = delete;
 
 		~bptr_obj() {}
 
@@ -38,10 +40,10 @@ namespace ssharp::containers
 		void set(T&& rhs) noexcept { value = make_shared<T>(std::move(rhs)); }
 
 		const T* operator->() const { return value.get(); }
-		const T& operator*() const { return *value.get(); }
+		const T& operator*() const { return *value; }
 
 		T* operator->() { return value.get(); }
-		T& operator*() { return *value.get(); }
+		T& operator*() { return *value; }
 
 		T& operator=(const T& rhs) {
 			this->set(rhs);

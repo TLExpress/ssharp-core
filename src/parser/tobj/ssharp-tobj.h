@@ -77,8 +77,8 @@ namespace ssharp::parser::tobj
 		uint32_t skip;
 	} texture_t;
 
-	header_t __SSHARP_TOBJ_DLL getHeaderFromBuff(const buff_pair_t& inpair);
-	string __SSHARP_TOBJ_DLL parseBuff(const buff_pair_t& inpair);
+	extern header_t __SSHARP_TOBJ_DLL getHeaderFromBuff(const buff_pair_t& inpair);
+	extern string __SSHARP_TOBJ_DLL parseBuff(const buff_pair_t& inpair);
 }
 #endif
 

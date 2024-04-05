@@ -30,10 +30,10 @@ using std::istream;
 
 namespace ssharp::utils::deflate
 {
-	extern buff_pair_t deflateBuff(const buff_pair_t& inpair);
-	extern buff_pair_t inflateBuff(const buff_pair_t& inpair, uint32_t outsize);
-	extern uint32_t crc32Buff(const buff_pair_t& inpair);
-	extern uint32_t adler32Buff(const buff_pair_t& inpair);
+	extern buff_pair_t __SSHARP_DEFLATE_DLL deflateBuff(const buff_pair_t& inpair);
+	extern buff_pair_t __SSHARP_DEFLATE_DLL inflateBuff(const buff_pair_t& inpair, uint32_t outsize);
+	extern uint32_t __SSHARP_DEFLATE_DLL crc32Buff(const buff_pair_t& inpair);
+	extern uint32_t __SSHARP_DEFLATE_DLL adler32Buff(const buff_pair_t& inpair);
 }
 
 

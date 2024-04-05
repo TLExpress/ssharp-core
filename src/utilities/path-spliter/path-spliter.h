@@ -24,7 +24,24 @@ using namespace ssharp::types;
 
 namespace ssharp::utils::path_spliter
 {
-	extern auto __SSHARP_PATHSPLITER_DLL splitPath(const string&) -> pair<string, string>;
+	extern pair<string, string> __SSHARP_PATHSPLITER_DLL splitPath(const string&);
 }
+
+#ifdef _WIN32
+#define __SSHARP_PATHSPLITER_CALLTYPE __stdcall
+#else
+#define __SSHARP_PATHSPLITER_CALLTYPE
+#endif
+
+#define __SSHARP_PATHSPLITER_CALL __SSHARP_PATHSPLITER_DLL __SSHARP_PATHSPLITER_CALLTYPE
+
+#ifdef __cplusplus
+#define __SSHARP_PATHSPLITER_EXT extern "C"
+#else
+#define __SSHARP_PATHSPLUTER_EXT extern
+#include <stdio.h>
+#endif
+
+__SSHARP_PATHSPLITER_EXT void __SSHARP_PATHSPLITER_CALL ssSplitPath(const char* in, char** left, char** right);
 
 #endif

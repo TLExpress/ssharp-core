@@ -26,7 +26,6 @@ namespace ssharp::types
 	typedef std::vector<std::string> strings;
 	typedef std::vector<std::wstring> wstrings;
 	typedef std::set<std::string> parsed_paths_t;
-	//typedef std::map<uint64_t, std::string> dictionary_t;
 	template<typename T>
 	using filter_ft = std::function<bool(const T&)>;
 	template<typename T>
@@ -37,7 +36,7 @@ namespace ssharp::types
 		uint8_t dlg;
 	}zlib_header_t;
 
-	struct buff_pair_t
+	struct __SSHARP_TYPES_DLL buff_pair_t
 	{
 		buff_t first;
 		size_t second;
