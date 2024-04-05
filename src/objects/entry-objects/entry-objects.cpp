@@ -143,7 +143,7 @@ namespace ssharp::entry_objects
 		return collapsed;
 	}
 
-	void sii_obj::encode()
+	void sii_obj::siiEncode()
 	{
 		if (!isEncoded())
 		{
@@ -153,7 +153,7 @@ namespace ssharp::entry_objects
 		}
 	}
 
-	void sii_obj::decode()
+	void sii_obj::siiDecode()
 	{
 		if (isEncoded())
 		{

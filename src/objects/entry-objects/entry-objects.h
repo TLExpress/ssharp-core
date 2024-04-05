@@ -117,12 +117,12 @@ namespace ssharp::entry_objects
 		bool isEncoded() const;
 		bool isSiiEncrypted() const;
 		bool isCollapsed() const;
-		void encrypt();
-		void decrypt();
-		void encode();
-		void decode();
-		void collapse();
-		void expand();
+		void siiEncrypt();
+		void siiDecrypt();
+		void siiEncode();
+		void siiDecode();
+		void siiCollapse();
+		void siiExpand();
 	};
 
 	class __SSHARP_EOBJECT_DLL directory_obj : public basic_obj
