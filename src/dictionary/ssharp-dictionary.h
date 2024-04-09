@@ -23,6 +23,7 @@
 using namespace ssharp::types;
 using namespace ssharp::utils::cityhash;
 using std::string;
+using std::pair;
 using std::map;
 
 namespace ssharp::dictionary

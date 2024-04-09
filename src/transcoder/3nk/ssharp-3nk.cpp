@@ -1,6 +1,6 @@
 ﻿#include "ssharp-3nk.h"
 
-namespace ssharp::_3nk
+namespace ssharp::transcoder::_3nk
 {
 // protected zone
 	void transcoder::transcodeBuffer(const buff_t inbuff, buff_t outbuff, const size_t size, const int64_t seed)
@@ -114,7 +114,7 @@ namespace ssharp::_3nk
 
 // export zone
 
-using namespace ssharp::_3nk;
+using namespace ssharp::transcoder::_3nk;
 
 bool __SSHARP_3NK_CALLTYPE ss3nk_is3nKFileBuff(char* buff, size_t size)
 {

@@ -32,15 +32,19 @@ namespace ssharp::fs::hashfs
 			content.source_pos = source_pos;
 			content.crc32 = entry.crc;
 			content.size = entry.size;
-			content.zsize = entry.zsize - sizeof(zlib_header) - sizeof(adler);
-			content.is_directory = entry.flags & is_directory;
-			content.compressed = entry.flags & is_compressed;
-			content.varify = entry.flags & varify;
-			content.encrypted = entry.flags & encrypted;
+			content.source_size = content.zsize = entry.zsize - sizeof(zlib_header) - sizeof(adler);
+			content.is_directory = entry.flags & 1;
+			content.compressed = entry.flags & (1<<1);
+			content.varify = entry.flags & (1<<2);
+			content.encrypted = entry.flags & (1 << 3);
 			content.zlib_header = zlib_header;
 			content.adler32 = adler;
-			list.push_back(is_directory ? directory_obj(std::move(content)) : basic_obj(std::move(content)));
+			if(content.is_directory)
+				list.push_back(ss_ptr<basic_obj>(directory_obj(std::move(content))));
+			else
+				list.push_back(basic_obj(std::move(content)));
 		}
+		file.close();
 		return list;
 	}
 	void storeFile(const string& filename, const entry_list_t& list)
@@ -49,7 +53,7 @@ namespace ssharp::fs::hashfs
 		tlist.hashfsInit();
 		header_t header;
 		header.salt = tlist.getSalt();
-		header.entries_count = tlist.size();
+		header.entries_count = (uint32_t)tlist.size();
 		header.offset = 0x20;//¼È®É
 		ofstream file(filename, ios::out | ios::binary);
 		file.write((char*)&header, sizeof(header));
@@ -60,21 +64,21 @@ namespace ssharp::fs::hashfs
 		}
 		for (auto const& tentry : tlist)
 		{
-			file.write((char*)&tentry->getModified().zlib_header.get(), sizeof(zlib_header_t));
-			if (tentry->getModified().source_type == memory)
+			file.write((char*)tentry->get()->zlib_header.get(), sizeof(zlib_header_t));
+			if (tentry->get()->source_type == memory)
 			{
-				auto& buff = tentry->getModified().mbuff.get();
+				auto& buff = *tentry->get()->mbuff;
 				file.write(buff, buff);
 			}
 			else
 			{
-				auto const& obj = tentry->getModified();
-				buff_pair_t buff(*obj.zsize);
-				ifstream sfile(*tentry->getModified().source_name, ios::in | ios::binary);
-				sfile.seekg(*obj.source_pos).read(buff,buff);
+				auto const& obj = *tentry;
+				buff_pair_t buff(*obj->zsize);
+				ifstream sfile(tentry->get()->source_name, ios::in | ios::binary);
+				sfile.seekg(*obj->source_pos).read(buff,buff);
 				file.write(buff, buff);
 			}
-			file.write((char*)&tentry->getModified().adler32.get(), sizeof(uint32_t));
+			file.write((char*)tentry->get()->adler32.get(), sizeof(uint32_t));
 		}
 	}
 }

@@ -42,7 +42,7 @@ using std::cerr;
 using std::endl;
 using std::ios;
 
-namespace ssharp::_3nk
+namespace ssharp::transcoder::_3nk
 {
 	struct Header
 	{

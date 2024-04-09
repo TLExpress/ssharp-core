@@ -49,13 +49,13 @@ namespace ssharp::fs::hashfs
 		uint32_t zsize=0;
 		entry_t() {}
 		entry_t(const basic_obj& entry) {
-			auto const& obj = entry.getModified();
+			auto const& obj = *entry;
 			hash = obj.hash;
 			offset = obj.offset;
-			flags=(obj.is_directory)|(obj.compressed<<1)|(obj.varify<<2)|(obj.encrypted<<3);
+			flags=((uint32_t)obj.is_directory)|((uint32_t)obj.compressed<<1)|((uint32_t)obj.varify<<2)|((uint32_t)obj.encrypted<<3);
 			crc = obj.crc32;
 			size = obj.size;
-			zsize = obj.zsize+sizeof(zlib_header_t)+sizeof(uint32_t);
+			zsize = (uint32_t)obj.zsize+sizeof(zlib_header_t)+sizeof(uint32_t);
 		}
 	};
 

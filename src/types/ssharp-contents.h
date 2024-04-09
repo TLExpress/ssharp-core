@@ -18,13 +18,13 @@
 #include <string>
 #include "types.h"
 #include "exceptions.h"
-#include "absentable.h"
+#include "ssharp-ptr.h"
 
 using std::string;
 using std::shared_ptr;
 
 using namespace ssharp::exceptions;
-using namespace ssharp::containers;
+using namespace ssharp::pointers;
 
 namespace ssharp::types
 {
@@ -36,74 +36,78 @@ namespace ssharp::types
 		content_t(const content_t& rhs) { *this = rhs; }
 		content_t(content_t&& rhs) noexcept { *this = std::move(rhs); }
 		source_type_t source_type = memory;
-		abs_obj<string> filename;
-		abs_obj<uint64_t> hash;
-		abs_obj<uint16_t> salt;
-		abs_obj<string> source_name;
-		abs_obj<size_t> source_pos;
-		abs_obj<size_t> source_size;
-		abs_obj<uint32_t> crc32;
+		ss_cptr<string> filename;
+		ss_cptr<uint64_t> hash;
+		ss_cptr<uint16_t> salt;
+		ss_cptr<string> source_name;
+		ss_cptr<size_t> source_pos;
+		ss_cptr<size_t> source_size;
+		ss_cptr<uint32_t> crc32;
 		uint32_t size = 0;
-		abs_obj<uint32_t> zsize = 0;
+		ss_cptr<uint32_t> zsize;
 		bool is_directory = false;
 		bool compressed = false;
 		bool varify = false;
 		bool encrypted = false;
-		abs_obj<zlib_header_t> zlib_header;
-		abs_obj<uint32_t> adler32;
-		abs_obj<buff_pair_t> mbuff;
-		abs_obj<uint64_t>offset;
+		ss_cptr<zlib_header_t> zlib_header;
+		ss_cptr<uint32_t> adler32;
+		ss_cptr<buff_pair_t> mbuff;
+		ss_cptr<uint64_t>offset;
 		content_t& operator=(const content_t& rhs)
 		{
-			this->source_type = rhs.source_type;
-			this->filename = rhs.filename;
-			this->hash = rhs.hash;
-			this->salt = rhs.salt;
-			this->source_name = rhs.source_name;
-			this->source_pos = rhs.source_pos;
-			this->source_size = rhs.source_size;
-			this->crc32 = rhs.crc32;
-			this->size = rhs.size;
-			this->zsize = rhs.zsize;
-			this->is_directory = rhs.is_directory;
-			this->compressed = rhs.compressed;
-			this->varify = rhs.varify;
-			this->encrypted = rhs.encrypted;
-			this->zlib_header = rhs.zlib_header;
-			this->adler32 = rhs.adler32;
-			this->mbuff = rhs.mbuff->copy();
+			source_type = rhs.source_type;
+			filename = rhs.filename;
+			hash = rhs.hash;
+			salt = rhs.salt;
+			source_name = rhs.source_name;
+			source_pos = rhs.source_pos;
+			source_size = rhs.source_size;
+			crc32 = rhs.crc32;
+			size = rhs.size;
+			zsize = rhs.zsize;
+			is_directory = rhs.is_directory;
+			compressed = rhs.compressed;
+			varify = rhs.varify;
+			encrypted = rhs.encrypted;
+			zlib_header = rhs.zlib_header;
+			adler32 = rhs.adler32;
+			if(rhs.mbuff)
+				*this->mbuff = rhs.mbuff->copy();
 			return *this;
 		}
 
 		content_t& operator=(content_t&& rhs) noexcept
 		{
-			this->source_type = std::move(rhs.source_type);
-			this->filename = std::move(rhs.filename);
-			this->hash = std::move(rhs.hash);
-			this->salt = std::move(rhs.salt);
-			this->source_name = std::move(rhs.source_name);
-			this->source_pos = std::move(rhs.source_pos);
-			this->source_size = std::move(rhs.source_size);
-			this->crc32 = std::move(rhs.crc32);
-			this->size = std::move(rhs.size);
-			this->is_directory = std::move(rhs.is_directory);
-			this->compressed = std::move(rhs.compressed);
-			this->varify = std::move(rhs.varify);
-			this->encrypted = std::move(rhs.encrypted);
-			this->zlib_header = std::move(rhs.zlib_header);
-			this->adler32 = std::move(rhs.adler32);
-			this->mbuff = std::move(rhs.mbuff);
+			source_type = std::move(rhs.source_type);
+			filename = std::move(rhs.filename);
+			hash = std::move(rhs.hash);
+			salt = std::move(rhs.salt);
+			source_name = std::move(rhs.source_name);
+			source_pos = std::move(rhs.source_pos);
+			source_size = std::move(rhs.source_size);
+			crc32 = std::move(rhs.crc32);
+			size = std::move(rhs.size);
+			is_directory = std::move(rhs.is_directory);
+			compressed = std::move(rhs.compressed);
+			varify = std::move(rhs.varify);
+			encrypted = std::move(rhs.encrypted);
+			zlib_header = std::move(rhs.zlib_header);
+			adler32 = std::move(rhs.adler32);
+			mbuff = std::move(rhs.mbuff);
 			return *this;
 		}
+		buff_pair_t getBuff() {
+			return getBuff(source_size);
+		}
 		buff_pair_t getBuff(size_t size) {
-			if (mbuff.attend())
+			if (mbuff)
 				return mbuff;
-			return stream_loader::loadStream(ifstream(filename, ios::in | ios::binary), source_pos, size);
+			return stream_loader::loadStream(ifstream(source_name, ios::in | ios::binary), source_pos, size);
 		}
 		buff_pair_t loadBuff() {
 			if (source_type == memory)
 				return mbuff;
-			mbuff = stream_loader::loadStream(ifstream(filename, ios::in | ios::binary), source_pos, source_size);
+			mbuff = stream_loader::loadStream(ifstream(source_name, ios::in | ios::binary), source_pos, source_size);
 			source_type = memory;
 			return mbuff;
 		}
